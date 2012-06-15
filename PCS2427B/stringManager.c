@@ -13,14 +13,14 @@
 #include "utils.h"
 
 
-void startStringManager(StringManager** manager) {
-	*manager = (StringManager*) malloc(sizeof(StringManager));
+void startStringManager(StringManager* manager) {
+	*manager = (StringManagerStruct*) malloc(sizeof(StringManagerStruct));
 
 	(*manager)->string = NULL;
 	(*manager)->index = 0;
 }
 
-void getStringFromConsole(StringManager** manager) {
+void getStringFromConsole(StringManager* manager) {
 	char newString[1024];
 
 	gets(newString);
@@ -32,7 +32,7 @@ void getStringFromConsole(StringManager** manager) {
 	strcpy((*manager)->string, newString);
 }
 
-void getStringFromFile(StringManager** manager, FILE* file) {
+void getStringFromFile(StringManager* manager, FILE* file) {
 	char newString[1024];
 
 	fgets(newString, 1023, file);
@@ -48,7 +48,7 @@ void getStringFromFile(StringManager** manager, FILE* file) {
  * returns 1 if end-of-string
  * returns 0 otherwise
  */
-int getSymbol(StringManager** manager, char* symbol) {
+int getSymbol(StringManager* manager, char* symbol) {
 	// only gets a char
 	symbol[0] = (*manager)->string[(*manager)->index];
 	symbol[1] = '\0';
@@ -61,15 +61,15 @@ int getSymbol(StringManager** manager, char* symbol) {
 	return 0;
 }
 
-void recycleSymbol(StringManager** manager, char* symbol) {
+void recycleSymbol(StringManager* manager, char* symbol) {
 	(*manager)->index -= strlen(symbol);
 }
 
-char* printString(StringManager* manager) {
+char* printString(StringManager manager) {
 	return &(manager->string[manager->index]);
 }
 
-char* printSymbol(StringManager* manager, int symbolSize) {
+char* printSymbol(StringManager manager, int symbolSize) {
 	char* string;
 	int i;
 
