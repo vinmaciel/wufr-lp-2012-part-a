@@ -16,9 +16,11 @@ typedef struct {
 	Table symbolTable;
 	Table stateTable;
 	int** production;
-} Automaton;
+} AutomatonStruct;
 
-void createGraph(FILE* input, Automaton** automaton);
+typedef AutomatonStruct* Automaton;
+
+void createGraph(FILE* input, Automaton* automaton);
 int testString(Automaton automaton, StringManager* stringManager);
 
 #endif /* GRAPH_H_ */

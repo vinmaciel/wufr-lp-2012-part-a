@@ -11,14 +11,16 @@
 typedef struct {
 	char* string;
 	int index;
-} StringManager;
+} StringManagerStruct;
 
-void startStringManager(StringManager** manager);
-void getStringFromConsole(StringManager** manager);
-void getStringFromFile(StringManager** manager, FILE* file);
-int getSymbol(StringManager** manager, char* symbol);
-void recycleSymbol(StringManager** manager, char* symbol);
-char* printString(StringManager* manager);
-char* printSymbol(StringManager* manager, int symbolSize);
+typedef StringManagerStruct* StringManager;
+
+void startStringManager(StringManager* manager);
+void getStringFromConsole(StringManager* manager);
+void getStringFromFile(StringManager* manager, FILE* file);
+int getSymbol(StringManager* manager, char* symbol);
+void recycleSymbol(StringManager* manager, char* symbol);
+char* printString(StringManager manager);
+char* printSymbol(StringManager manager, int symbolSize);
 
 #endif /* STRINGMANAGER_H_ */

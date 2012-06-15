@@ -13,9 +13,9 @@
 #include "stringManager.h"
 
 int main() {
-	Automaton* automaton;
+	Automaton automaton;
 	FILE* input;
-	StringManager* stringManager;
+	StringManager stringManager;
 	char fileName[64];
 
 	// initiate string manager
@@ -64,7 +64,7 @@ int main() {
 	}
 
 	while(1) {
-		if(testString(*automaton, stringManager))
+		if(testString(automaton, &stringManager))
 			printf("\nString \"%s\" accepted by the automaton.\n", stringManager->string);
 		else
 			printf("\nString \"%s\" not accepted by the automaton.\n", stringManager->string);

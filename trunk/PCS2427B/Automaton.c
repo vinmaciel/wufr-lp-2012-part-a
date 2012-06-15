@@ -14,12 +14,12 @@
 #include "Automaton.h"
 #include "StringManager.h"
 
-void createGraph(FILE* input, Automaton** automaton) {
+void createGraph(FILE* input, Automaton* automaton) {
 	char stateName[NAME_LENGTH], symbol[NAME_LENGTH], nextStateName[NAME_LENGTH];
 	int stateIndex, symbolIndex, nextStateIndex;
 	int i, j;
 
-	*automaton = (Automaton*) malloc(sizeof(Automaton));
+	*automaton = (AutomatonStruct*) malloc(sizeof(AutomatonStruct));
 
 	createTable(input, &((*automaton)->stateTable));
 	createTable(input, &((*automaton)->symbolTable));
@@ -73,40 +73,40 @@ int testString(Automaton automaton, StringManager* stringManager) {
 
 	// get log file name
 	strcpy(logName, "log\\");
-	for(i = 0, j = 0; stringManager->string[i] != '\0'; i++) {
-		if(isalnum(stringManager->string[i])) {
-			logName[4+j] = stringManager->string[i];
+	for(i = 0, j = 0; !iscntrl((*stringManager)->string[i]); i++) {
+		if(isalnum((*stringManager)->string[i])) {
+			logName[4+j] = (*stringManager)->string[i];
 			j++;
 		}
 	}
-	logName[4+i] = '\0';
+	logName[4+j] = '\0';
 	strcat(logName, ".txt");
 	log = fopen(logName, "a");
 
 	// log: write input string
-	fprintf(log, "\tInput string:\t%s\n\n", stringManager->string);
+	fprintf(log, "\tInput string:\t%s\n\n", (*stringManager)->string);
 
 	// get first symbol
 	symbol = (char*) malloc(2*sizeof(char));
-	endOfString = getSymbol(&stringManager, symbol);
+	endOfString = getSymbol(stringManager, symbol);
 	for(endOfString = 0, currentStateIndex = 0; !endOfString && currentStateIndex >= 0; i++) {
-		symbolIndex = findIndex(automaton.symbolTable, symbol);
+		symbolIndex = findIndex(automaton->symbolTable, symbol);
 
 		if(log != NULL)
-			fprintf(log, "State: %s\nRemaining String: %s\n---\n", automaton.stateTable.elem[currentStateIndex], printString(stringManager));
+			fprintf(log, "State: %s\nRemaining String: %s\n---\n", automaton->stateTable.elem[currentStateIndex], printString(*stringManager));
 
 		// do the transition
 		if(symbolIndex >= 0)
-			currentStateIndex = automaton.production[currentStateIndex][symbolIndex];
+			currentStateIndex = automaton->production[currentStateIndex][symbolIndex];
 
 		// get a new symbol
-			endOfString = getSymbol(&stringManager, symbol);
+			endOfString = getSymbol(stringManager, symbol);
 	}
 	if(log != NULL) {
 		if(currentStateIndex < 0)
 			fprintf(log, "End State: REJECTION STATE.\n");
 		else
-			fprintf(log, "End State: %s\n", automaton.stateTable.elem[currentStateIndex]);
+			fprintf(log, "End State: %s\n", automaton->stateTable.elem[currentStateIndex]);
 	}
 
 	// close log
@@ -114,6 +114,6 @@ int testString(Automaton automaton, StringManager* stringManager) {
 	fclose(log);
 
 	// accept (or don't) the string
-	if(currentStateIndex > 0 && acceptState(currentStateIndex, automaton.stateTable)) return 1;
+	if(currentStateIndex > 0 && acceptState(currentStateIndex, automaton->stateTable)) return 1;
 	else return 0;
 }
