@@ -1,0 +1,20 @@
+8
+"S" "R" "P" "N" "*M" "A" "B" "*C"
+5
+"+" "-" "d" "." "@"
+S + R
+S - R
+S d A
+S . B
+R d A
+R . B
+P + N
+P - N
+P d *M
+N d *M
+*M d *M
+A d A
+A . *C
+B d *C
+*C d *C
+*C @ P
