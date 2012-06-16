@@ -9,6 +9,8 @@
 #ifndef TABLE_H_
 #define TABLE_H_
 
+#include <stdio.h>
+
 #define NAME_LENGTH 32
 
 typedef struct {

@@ -8,6 +8,8 @@
 #ifndef STRINGMANAGER_H_
 #define STRINGMANAGER_H_
 
+#include <stdio.h>
+
 typedef struct {
 	char* string;
 	int index;
