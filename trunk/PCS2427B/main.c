@@ -10,10 +10,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Automaton.h"
+#include "AutomataList.h"
+#include "Machine.h"
 #include "stringManager.h"
 
 int main() {
-	Automaton automaton;
+	Machine machine;
 	FILE* input;
 	StringManager stringManager;
 	char fileName[64];
@@ -31,11 +33,11 @@ int main() {
 	}
 
 	// create the automaton
-	createGraph(input, &automaton);
+	createMachine(input, &machine);
 
 	// close automaton file
 	fclose(input);
-	printf("Automaton loaded successfully.\n\n");
+	printf("Machine loaded successfully.\n\n");
 	fflush(stdout);
 
 	// choose input mode
@@ -64,7 +66,7 @@ int main() {
 	}
 
 	while(1) {
-		if(testString(automaton, &stringManager))
+		if(testString(machine, &stringManager))
 			printf("\nString \"%s\" accepted by the automaton.\n", stringManager->string);
 		else
 			printf("\nString \"%s\" not accepted by the automaton.\n", stringManager->string);

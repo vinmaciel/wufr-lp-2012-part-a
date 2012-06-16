@@ -9,6 +9,7 @@
 #ifndef GRAPH_H_
 #define GRAPH_H_
 
+#include <stdio.h>
 #include "Table.h"
 #include "StringManager.h"
 
@@ -21,6 +22,5 @@ typedef struct {
 typedef AutomatonStruct* Automaton;
 
 void createGraph(FILE* input, Automaton* automaton);
-int testString(Automaton automaton, StringManager* stringManager);
 
 #endif /* GRAPH_H_ */
