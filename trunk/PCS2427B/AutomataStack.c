@@ -9,7 +9,7 @@
 #include "AutomataStack.h"
 
 void newAutomataStack(AutomataStack* stack) {
-	stack = NULL;
+	*stack = NULL;
 	freeList = NULL;
 }
 
@@ -34,7 +34,7 @@ void pushAutomaton(AutomataStack* stack, int machine, int nextState) {
 	newNode->machineIndex = machine;
 	newNode->nextStateIndex = nextState;
 
-	if(stack == NULL) {
+	if(*stack == NULL) {
 		newNode->next = newNode;
 		*stack = newNode;
 	}
@@ -42,8 +42,6 @@ void pushAutomaton(AutomataStack* stack, int machine, int nextState) {
 		newNode->next = (*stack)->next;
 		(*stack)->next = newNode;
 	}
-
-	*stack = (*stack)->next;
 }
 
 void popAutomaton(AutomataStack* stack, int* machine, int* nextState) {

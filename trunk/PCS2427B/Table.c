@@ -81,7 +81,7 @@ int isAcceptState(int indexState, Table stateTable) {
 }
 
 int isSubMachine(int indexSymbol, Table symbolTable) {
-	if(symbolTable.elem[indexSymbol][0] == '<' && symbolTable.elem[indexSymbol][strlen(symbolTable.elem[indexSymbol])] == '>')
+	if(symbolTable.elem[indexSymbol][0] == '<' && symbolTable.elem[indexSymbol][strlen(symbolTable.elem[indexSymbol])-1] == '>')
 		return 1;
 
 	return 0;

@@ -33,8 +33,8 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 	for(i = 0; i < (*automaton)->stateTable.size; i++)
 		(*automaton)->production[i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
 	// allocate memory to the submachine-call table
-	(*automaton)->submachine[0] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
-	(*automaton)->submachine[1] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+	(*automaton)->submachine[0] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
+	(*automaton)->submachine[1] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
 
 	// set all productions to rejection state
 	for(i = 0; i < (*automaton)->stateTable.size; i++)
@@ -75,8 +75,8 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 		else { // set a new transition
 			if(isSubMachine(symbolIndex, (*automaton)->symbolTable)) {
 				getSubmachineName(symbolIndex, (*automaton)->symbolTable, submachineName);
-				(*automaton)->submachine[stateIndex][0] = findIndex(automataTable, submachineName);
-				(*automaton)->submachine[stateIndex][1] = nextStateIndex;
+				(*automaton)->submachine[0][stateIndex] = findIndex(automataTable, submachineName);
+				(*automaton)->submachine[1][stateIndex] = nextStateIndex;
 			}
 			else
 				(*automaton)->production[stateIndex][symbolIndex] = nextStateIndex;
