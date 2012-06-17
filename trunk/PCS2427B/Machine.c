@@ -40,7 +40,7 @@ void createMachine(FILE* input, Machine* machine) {
 			exit(3);
 		}
 		else
-			createGraph(automatonFile, &automaton);
+			createGraph(automatonFile, &automaton, (*machine)->automataTable);
 
 		printf("Automaton \"%s\" created successfully.\n", (*machine)->automataTable.elem[i]);
 		fflush(stdout);
@@ -110,6 +110,6 @@ int testString(Machine machine, StringManager* stringManager) {
 	fclose(log);
 
 	// accept (or don't) the string
-	if(currentStateIndex > 0 && acceptState(currentStateIndex, currentAutomaton->stateTable)) return 1;
+	if(currentStateIndex > 0 && isAcceptState(currentStateIndex, currentAutomaton->stateTable)) return 1;
 	else return 0;
 }

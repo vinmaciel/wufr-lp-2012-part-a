@@ -21,6 +21,8 @@ typedef struct {
 void createTable(FILE* input, Table* table);
 int findIndex(Table table, char* name);
 void getName(FILE* input, char* newName);
-int acceptState(int indexState, Table stateTable);
+int isAcceptState(int indexState, Table stateTable);
+int isSubMachine(int indexSymbol, Table automataTable);
+void getSubmachineName(int indexMachine, Table symbolTable, char* name);
 
 #endif /* TABLE_H_ */
