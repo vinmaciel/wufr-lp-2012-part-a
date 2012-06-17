@@ -12,6 +12,7 @@
 #include "Table.h"
 #include "Machine.h"
 #include "AutomataList.h"
+#include "AutomataStack.h"
 
 void createMachine(FILE* input, Machine* machine) {
 	int i;
@@ -52,14 +53,16 @@ void createMachine(FILE* input, Machine* machine) {
 
 int testString(Machine machine, StringManager* stringManager) {
 	int i, j;
-	int currentStateIndex, symbolIndex;
-	int endOfString;
+	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
+	int endOfString, noTransition;
 	char* symbol;
 	Automaton currentAutomaton;
+	AutomataStack stack;
 	FILE* log;
 	char logName[259];
 
-	// get log file name
+
+	// log: get file name
 	strcpy(logName, "log\\");
 	for(i = 0, j = 0; !iscntrl((*stringManager)->string[i]); i++) {
 		if(isalnum((*stringManager)->string[i])) {
@@ -74,42 +77,78 @@ int testString(Machine machine, StringManager* stringManager) {
 	// log: write input string
 	fprintf(log, "\tInput string:\t%s\n\n", (*stringManager)->string);
 
-	// get the first automaton
-	currentAutomaton = getAutomatonByIndex(machine->automataList, 0);
+	// get an empty stack
+	newAutomataStack(&stack);
+
+	// get the initial automaton
+	currentAutomatonIndex = 0;
+	currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
 	if(currentAutomaton == NULL) {
 		printf("ERROR: Searching for non-existing automaton.\n");
 		fflush(stdout);
 		exit(4);
 	}
 
-	// get first symbol
-	symbol = (char*) malloc(2*sizeof(char));
-	endOfString = getSymbol(stringManager, symbol);
-	for(currentStateIndex = 0; !endOfString && currentStateIndex >= 0; i++) {
-		symbolIndex = findIndex(currentAutomaton->symbolTable, symbol);
+	symbol = (char*) malloc(2*sizeof(char)); // only char
+	endOfString = 0;
+	noTransition = 0;
 
+	for(nextStateIndex = 0; !endOfString && !noTransition && nextStateIndex >= 0; i++) {
+		currentStateIndex = nextStateIndex;
+
+		// log: store state of the machine
 		if(log != NULL)
 			fprintf(log, "State: %s\nRemaining String: %s\n---\n", currentAutomaton->stateTable.elem[currentStateIndex], printString(*stringManager));
 
-		// do the transition
-		if(symbolIndex >= 0)
-			currentStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
-
-		// get a new symbol
+		// get symbol
 		endOfString = getSymbol(stringManager, symbol);
+		symbolIndex = findIndex(currentAutomaton->symbolTable, symbol);
+
+		if(!endOfString) {
+			// do the production
+			if(symbolIndex >= 0)
+				nextStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
+
+			/*
+			 * if the symbol doesn't belong to the machine OR
+			 * the production redirects to a rejection state
+			 * => verify if there is a submachine call in this state
+			 */
+			if(symbolIndex < 0 || nextStateIndex < 0) {
+				// enter the submachine
+				if(currentAutomaton->submachine[0][currentStateIndex] >= 0) {
+					pushAutomaton(&stack, currentAutomatonIndex, currentAutomaton->submachine[1][currentStateIndex]);
+
+					currentAutomatonIndex = currentAutomaton->submachine[0][currentStateIndex];
+					currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
+					nextStateIndex = 0;
+				}
+				// verify if there is a stacked submachine
+				else {
+					if(!isEmptyStack(stack) && isAcceptState(currentStateIndex, machine->automataList->elem->stateTable))
+						popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
+					else
+						noTransition = 1;
+				}
+
+				recycleSymbol(stringManager, symbol);
+			}
+		}
 	}
+
+	// log: write ending state
 	if(log != NULL) {
-		if(currentStateIndex < 0)
+		if(nextStateIndex < 0)
 			fprintf(log, "End State: REJECTION STATE.\n");
 		else
-			fprintf(log, "End State: %s\n", currentAutomaton->stateTable.elem[currentStateIndex]);
+			fprintf(log, "End State: %s\n", currentAutomaton->stateTable.elem[nextStateIndex]);
 	}
 
-	// close log
+	// log: close file
 	fprintf(log, "\n\n\n");
 	fclose(log);
 
 	// accept (or don't) the string
-	if(currentStateIndex > 0 && isAcceptState(currentStateIndex, currentAutomaton->stateTable)) return 1;
+	if(nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack)) return 1;
 	else return 0;
 }
