@@ -73,9 +73,24 @@ void getName(FILE* input, char* newName) {
 	strcpy(newName, name);
 }
 
-int acceptState(int indexState, Table stateTable) {
+int isAcceptState(int indexState, Table stateTable) {
 	if(stateTable.elem[indexState][0] == '*')
 		return 1;
 
 	return 0;
+}
+
+int isSubMachine(int indexSymbol, Table symbolTable) {
+	if(symbolTable.elem[indexSymbol][0] == '<' && symbolTable.elem[indexSymbol][strlen(symbolTable.elem[indexSymbol])] == '>')
+		return 1;
+
+	return 0;
+}
+
+void getSubmachineName(int indexMachine, Table symbolTable, char* name) {
+	int i;
+
+	for(i = 1; symbolTable.elem[indexMachine][i] != '>'; i++)
+		name[i-1] = symbolTable.elem[indexMachine][i];
+	name[i-1] = '\0';
 }

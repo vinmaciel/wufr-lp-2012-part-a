@@ -16,11 +16,12 @@
 typedef struct {
 	Table symbolTable;
 	Table stateTable;
-	int** production;
+	int** production;	// production[current_state][symbol] => next_state
+	int* submachine[2];	// submachine[current_state] => (next_machine, next_state_after_return)
 } AutomatonStruct;
 
 typedef AutomatonStruct* Automaton;
 
-void createGraph(FILE* input, Automaton* automaton);
+void createGraph(FILE* input, Automaton* automaton, Table automataTable);
 
 #endif /* GRAPH_H_ */
