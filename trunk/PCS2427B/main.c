@@ -95,10 +95,11 @@ int main() {
 
 			getStringFromFile(&stringManager, input);
 			stream = ftell(input);
-			fclose(input);
 
-			if(iscntrl(stringManager->string[0]))
+			if(feof(input))
 				break;
+
+			fclose(input);
 		}
 	}
 

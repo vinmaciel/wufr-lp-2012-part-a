@@ -52,7 +52,12 @@ void getName(FILE* input, char* newName) {
 
 	quotes = 0;
 	for(i = 0; i < NAME_LENGTH; i++) {
-		fscanf(input, "%c", &letter);
+		letter = fgetc(input);
+
+		if(letter == EOF) {
+			newName[0] = letter;
+			return;
+		}
 
 		if(letter == '"')
 			if(quotes == 0) {

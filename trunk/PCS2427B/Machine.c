@@ -100,8 +100,12 @@ int testString(Machine machine, StringManager* stringManager) {
 		currentStateIndex = nextStateIndex;
 
 		// log: store state of the machine
-		if(log != NULL)
-			fprintf(log, "State: %s\nRemaining String: %s\n---\n", currentAutomaton->stateTable.elem[currentStateIndex], printString(*stringManager));
+		if(log != NULL){
+			fprintf(log, "State: %s\n", currentAutomaton->stateTable.elem[currentStateIndex]);
+			fprintf(log, "Remaining String: %s\n", printString(*stringManager));
+			fprintf(log, "Stack size: %d\n", stackSize(stack));
+			fprintf(log, "---\n\n");
+		}
 
 		// get symbol
 		endOfString = getSymbol(stringManager, symbol);
@@ -125,11 +129,15 @@ int testString(Machine machine, StringManager* stringManager) {
 					currentAutomatonIndex = currentAutomaton->submachine[0][currentStateIndex];
 					currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
 					nextStateIndex = 0;
+					fprintf(log, "<Push>\n");
 				}
 				// verify if there is a stacked submachine
 				else {
-					if(!isEmptyStack(stack) && isAcceptState(currentStateIndex, machine->automataList->elem->stateTable))
+					if(!isEmptyStack(stack) && isAcceptState(currentStateIndex, currentAutomaton->stateTable)) {
 						popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
+						currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
+						fprintf(log, "<Pop>\n");
+					}
 					else
 						noTransition = 1;
 				}
@@ -139,12 +147,21 @@ int testString(Machine machine, StringManager* stringManager) {
 		}
 	}
 
+	// try to pop all automata
+	while(!isEmptyStack(stack) && isAcceptState(nextStateIndex, currentAutomaton->stateTable)) {
+		popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
+		currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
+		fprintf(log, "<End-of-string... Popping>\n");
+	}
+
 	// log: write ending state
 	if(log != NULL) {
 		if(nextStateIndex < 0)
 			fprintf(log, "End State: REJECTION STATE.\n");
 		else
 			fprintf(log, "End State: %s\n", currentAutomaton->stateTable.elem[nextStateIndex]);
+
+		fprintf(log, "Stack size: %d\n", stackSize(stack));
 	}
 
 	// log: close file
