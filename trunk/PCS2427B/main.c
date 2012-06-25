@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "Automaton.h"
 #include "AutomataList.h"
 #include "Machine.h"
@@ -19,6 +20,7 @@ int main() {
 	FILE* input;
 	StringManager stringManager;
 	char fileName[64];
+	long int stream;
 
 	// initiate string manager
 	startStringManager(&stringManager);
@@ -63,6 +65,8 @@ int main() {
 		}
 
 		getStringFromFile(&stringManager, input);
+		stream = ftell(input);
+		fclose(input);
 	}
 
 	while(1) {
@@ -72,7 +76,7 @@ int main() {
 			printf("\nString \"%s\" not accepted by the automaton.\n", stringManager->string);
 		fflush(stdout);
 
-		if(input == NULL) {
+		if(!stream) {
 			printf("Do you wish to test another string? (Type n if you don't) ");
 			fflush(stdout);
 			gets(fileName);
@@ -86,9 +90,14 @@ int main() {
 			}
 		}
 		else {
-			if(!feof(input))
-				getStringFromFile(&stringManager, input);
-			else
+			input = fopen(fileName, "r");
+			fseek(input, stream, SEEK_CUR);
+
+			getStringFromFile(&stringManager, input);
+			stream = ftell(input);
+			fclose(input);
+
+			if(iscntrl(stringManager->string[0]))
 				break;
 		}
 	}

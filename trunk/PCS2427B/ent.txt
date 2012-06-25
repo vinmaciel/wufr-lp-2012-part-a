@@ -1,5 +1,0 @@
-TI,I,I
-TI<>N
-TI,I,I<>N
-TI<N>
-TI
