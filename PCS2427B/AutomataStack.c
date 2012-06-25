@@ -60,3 +60,13 @@ int isEmptyStack(AutomataStack stack) {
 
 	return 0;
 }
+
+int stackSize(AutomataStack stack) {
+	AutomataStack search;
+	int size = 0;
+
+	for(search = stack; search != NULL; search = search->next)
+		size++;
+
+	return size;
+}

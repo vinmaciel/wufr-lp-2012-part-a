@@ -27,5 +27,6 @@ void releaseStackNode(AutomataStack freeNode);
 void pushAutomaton(AutomataStack* stack, int machine, int nextState);
 void popAutomaton(AutomataStack* stack, int* machine, int* nextState);
 int isEmptyStack(AutomataStack stack);
+int stackSize(AutomataStack stack);
 
 #endif /* AUTOMATASTACK_H_ */

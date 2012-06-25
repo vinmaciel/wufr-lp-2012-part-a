@@ -50,7 +50,8 @@ void getStringFromFile(StringManager* manager, FILE* file) {
  */
 int getSymbol(StringManager* manager, char* symbol) {
 	// only gets a char
-	symbol[0] = (*manager)->string[(*manager)->index];
+	for(symbol[0] = (*manager)->string[(*manager)->index]; isspace(symbol[0]); (*manager)->index++)
+		symbol[0] = (*manager)->string[(*manager)->index];
 	symbol[1] = '\0';
 
 	(*manager)->index++;

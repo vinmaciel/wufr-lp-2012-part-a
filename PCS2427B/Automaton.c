@@ -48,8 +48,10 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 
 
 	// read the transitions (productions and submachine calls)
-	while(!feof(input)) {
-		fscanf(input, "%s %s %s", stateName, symbol, nextStateName);
+	getName(input, stateName);
+	while(stateName[0] != EOF) {
+		getName(input, symbol);
+		getName(input, nextStateName);
 
 		// get the indexes (current state, symbol consumed, next state)
 		stateIndex = findIndex((*automaton)->stateTable, stateName);
@@ -81,5 +83,17 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 			else
 				(*automaton)->production[stateIndex][symbolIndex] = nextStateIndex;
 		}
+
+		getName(input, stateName);
 	}
+/*
+	for(i = 0; i < (*automaton)->stateTable.size; i++){
+		for(j = 0; j < (*automaton)->symbolTable.size; j++)
+			printf("%d ", (*automaton)->production[i][j]);fflush(stdout);
+		printf("\n");fflush(stdout);}
+
+	for(i = 0; i < (*automaton)->symbolTable.size; i++) {
+		printf("%d %d\n", (*automaton)->submachine[0][i], (*automaton)->submachine[1][i]);fflush(stdout);
+	}
+	printf("\n");fflush(stdout);*/
 }
