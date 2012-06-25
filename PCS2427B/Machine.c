@@ -20,6 +20,9 @@ void createMachine(FILE* input, Machine* machine) {
 	Automaton automaton;
 	FILE* automatonFile;
 
+	// create free list
+	newFreeList();
+
 	*machine = (MachineStruct*) malloc(sizeof(MachineStruct));
 
 	// create the automata table
