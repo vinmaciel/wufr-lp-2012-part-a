@@ -16,6 +16,18 @@ void newAutomataStack(AutomataStack* stack) {
 	*stack = NULL;
 }
 
+void cleanAutomataStack(AutomataStack* stack) {
+	AutomataStack search, freeNode;
+
+	search = *stack;
+	while(search != NULL) {
+		freeNode = search;
+		search = search->next;
+
+		releaseStackNode(freeNode);
+	}
+}
+
 void getNewStackNode(AutomataStack* newNode) {
 	if(freeList == NULL)
 		*newNode = (AutomataStackNode*) malloc(sizeof(AutomataStackNode));

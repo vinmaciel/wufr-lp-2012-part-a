@@ -57,7 +57,7 @@ void createMachine(FILE* input, Machine* machine) {
 int testString(Machine machine, StringManager* stringManager) {
 	int i, j;
 	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
-	int endOfString, noTransition;
+	int endOfString, noTransition, result;
 	char* symbol;
 	Automaton currentAutomaton;
 	AutomataStack stack;
@@ -101,10 +101,12 @@ int testString(Machine machine, StringManager* stringManager) {
 
 		// log: store state of the machine
 		if(log != NULL){
+			fprintf(log, "Machine: %s\n", machine->automataTable.elem[currentAutomatonIndex]);
 			fprintf(log, "State: %s\n", currentAutomaton->stateTable.elem[currentStateIndex]);
 			fprintf(log, "Remaining String: %s\n", printString(*stringManager));
 			fprintf(log, "Stack size: %d\n", stackSize(stack));
 			fprintf(log, "---\n\n");
+			fflush(log);
 		}
 
 		// get symbol
@@ -148,7 +150,7 @@ int testString(Machine machine, StringManager* stringManager) {
 	}
 
 	// try to pop all automata
-	while(!isEmptyStack(stack) && isAcceptState(nextStateIndex, currentAutomaton->stateTable)) {
+	while(!isEmptyStack(stack) && nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable)) {
 		popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
 		currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
 		fprintf(log, "<End-of-string... Popping>\n");
@@ -164,11 +166,21 @@ int testString(Machine machine, StringManager* stringManager) {
 		fprintf(log, "Stack size: %d\n", stackSize(stack));
 	}
 
+	// accept (or don't) the string
+	if(nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack)) {
+		fprintf(log, "ACCEPTED!");
+		result = 1;
+	}
+	else {
+		fprintf(log, "REJECTED!");
+		result = 0;
+	}
+
 	// log: close file
 	fprintf(log, "\n\n\n");
 	fclose(log);
 
-	// accept (or don't) the string
-	if(nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack)) return 1;
-	else return 0;
+	cleanAutomataStack(&stack);
+
+	return result;
 }
