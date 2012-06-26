@@ -48,35 +48,35 @@ void getStringFromFile(StringManager* manager, FILE* file) {
  * returns 1 if end-of-string
  * returns 0 otherwise
  */
-int getSymbol(StringManager* manager, char* symbol) {
+int getToken(StringManager* manager, char* token) {
 	// only gets a char
-	for(symbol[0] = (*manager)->string[(*manager)->index]; isspace(symbol[0]); (*manager)->index++)
-		symbol[0] = (*manager)->string[(*manager)->index];
-	symbol[1] = '\0';
+	for(token[0] = (*manager)->string[(*manager)->index]; isspace(token[0]); (*manager)->index++)
+		token[0] = (*manager)->string[(*manager)->index];
+	token[1] = '\0';
 
 	(*manager)->index++;
 
-	if(iscntrl(symbol[0]))
+	if(iscntrl(token[0]))
 		return 1;
 
 	return 0;
 }
 
-void recycleSymbol(StringManager* manager, char* symbol) {
-	(*manager)->index -= strlen(symbol);
+void recycleToken(StringManager* manager, char* token) {
+	(*manager)->index -= strlen(token);
 }
 
 char* printString(StringManager manager) {
 	return &(manager->string[manager->index]);
 }
 
-char* printSymbol(StringManager manager, int symbolSize) {
+char* printToken(StringManager manager, int tokenSize) {
 	char* string;
 	int i;
 
-	string = (char*) malloc((symbolSize+1)*sizeof(char));
+	string = (char*) malloc((tokenSize+1)*sizeof(char));
 
-	for(i = 0; i < symbolSize; i++) {
+	for(i = 0; i < tokenSize; i++) {
 		string[i] = manager->string[manager->index+i];
 	}
 	string[i] = '\0';

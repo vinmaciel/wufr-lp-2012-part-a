@@ -56,9 +56,9 @@ void createMachine(FILE* input, Machine* machine) {
 
 int testString(Machine machine, StringManager* stringManager) {
 	int i, j;
-	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
+	int currentStateIndex, tokenIndex, nextStateIndex, currentAutomatonIndex;
 	int endOfString, noTransition, result;
-	char* symbol;
+	char* token;
 	Automaton currentAutomaton;
 	AutomataStack stack;
 	FILE* log;
@@ -92,7 +92,7 @@ int testString(Machine machine, StringManager* stringManager) {
 		exit(4);
 	}
 
-	symbol = (char*) malloc(2*sizeof(char)); // only char
+	token = (char*) malloc(2*sizeof(char)); // only char
 	endOfString = 0;
 	noTransition = 0;
 
@@ -109,21 +109,21 @@ int testString(Machine machine, StringManager* stringManager) {
 			fflush(log);
 		}
 
-		// get symbol
-		endOfString = getSymbol(stringManager, symbol);
-		symbolIndex = findIndex(currentAutomaton->symbolTable, symbol);
+		// get token
+		endOfString = getToken(stringManager, token);
+		tokenIndex = findIndex(currentAutomaton->tokenTable, token);
 
 		if(!endOfString) {
 			// do the production
-			if(symbolIndex >= 0)
-				nextStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
+			if(tokenIndex >= 0)
+				nextStateIndex = currentAutomaton->production[currentStateIndex][tokenIndex];
 
 			/*
-			 * if the symbol doesn't belong to the machine OR
+			 * if the token doesn't belong to the machine OR
 			 * the production redirects to a rejection state
 			 * => verify if there is a submachine call in this state
 			 */
-			if(symbolIndex < 0 || nextStateIndex < 0) {
+			if(tokenIndex < 0 || nextStateIndex < 0) {
 				// enter the submachine
 				if(currentAutomaton->submachine[0][currentStateIndex] >= 0) {
 					pushAutomaton(&stack, currentAutomatonIndex, currentAutomaton->submachine[1][currentStateIndex]);
@@ -144,7 +144,7 @@ int testString(Machine machine, StringManager* stringManager) {
 						noTransition = 1;
 				}
 
-				recycleSymbol(stringManager, symbol);
+				recycleToken(stringManager, token);
 			}
 		}
 	}
@@ -154,6 +154,10 @@ int testString(Machine machine, StringManager* stringManager) {
 		popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
 		currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
 		fprintf(log, "<End-of-string... Popping>\n");
+		fprintf(log, "Machine: %s\n", machine->automataTable.elem[currentAutomatonIndex]);
+		fprintf(log, "State: %s\n", currentAutomaton->stateTable.elem[nextStateIndex]);
+		fprintf(log, "Stack size: %d\n", stackSize(stack));
+		fprintf(log, "---\n\n");
 	}
 
 	// log: write ending state

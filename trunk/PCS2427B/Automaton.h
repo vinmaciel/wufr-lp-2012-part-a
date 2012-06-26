@@ -14,9 +14,9 @@
 #include "StringManager.h"
 
 typedef struct {
-	Table symbolTable;
+	Table tokenTable;
 	Table stateTable;
-	int** production;	// production[current_state][symbol] => next_state
+	int** production;	// production[current_state][token] => next_state
 	int* submachine[2];	// submachine[current_state] => (next_machine, next_state_after_return)
 } AutomatonStruct;
 
