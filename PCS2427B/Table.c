@@ -85,17 +85,17 @@ int isAcceptState(int indexState, Table stateTable) {
 	return 0;
 }
 
-int isSubMachine(int indexSymbol, Table symbolTable) {
-	if(symbolTable.elem[indexSymbol][0] == '<' && symbolTable.elem[indexSymbol][strlen(symbolTable.elem[indexSymbol])-1] == '>')
+int isSubMachine(int indexToken, Table tokenTable) {
+	if(tokenTable.elem[indexToken][0] == '<' && tokenTable.elem[indexToken][strlen(tokenTable.elem[indexToken])-1] == '>')
 		return 1;
 
 	return 0;
 }
 
-void getSubmachineName(int indexMachine, Table symbolTable, char* name) {
+void getSubmachineName(int indexMachine, Table tokenTable, char* name) {
 	int i;
 
-	for(i = 1; symbolTable.elem[indexMachine][i] != '>'; i++)
-		name[i-1] = symbolTable.elem[indexMachine][i];
+	for(i = 1; tokenTable.elem[indexMachine][i] != '>'; i++)
+		name[i-1] = tokenTable.elem[indexMachine][i];
 	name[i-1] = '\0';
 }

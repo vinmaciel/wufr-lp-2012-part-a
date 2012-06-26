@@ -14,9 +14,9 @@
 #include "Automaton.h"
 
 void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
-	char stateName[NAME_LENGTH], symbol[NAME_LENGTH], nextStateName[NAME_LENGTH];
+	char stateName[NAME_LENGTH], token[NAME_LENGTH], nextStateName[NAME_LENGTH];
 	char submachineName[64];
-	int stateIndex, symbolIndex, nextStateIndex;
+	int stateIndex, tokenIndex, nextStateIndex;
 	int i, j;
 
 	submachineName[0] = '\0';
@@ -24,24 +24,24 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 	// allocate memory to automaton (struct)
 	*automaton = (AutomatonStruct*) malloc(sizeof(AutomatonStruct));
 
-	// store symbol and state tables
+	// store token and state tables
 	createTable(input, &((*automaton)->stateTable));
-	createTable(input, &((*automaton)->symbolTable));
+	createTable(input, &((*automaton)->tokenTable));
 
 	// allocate memory to the production table
 	(*automaton)->production = (int**) malloc(((*automaton)->stateTable.size)*sizeof(int*));
 	for(i = 0; i < (*automaton)->stateTable.size; i++)
-		(*automaton)->production[i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+		(*automaton)->production[i] = (int*) malloc(((*automaton)->tokenTable.size)*sizeof(int));
 	// allocate memory to the submachine-call table
 	(*automaton)->submachine[0] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
 	(*automaton)->submachine[1] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
 
 	// set all productions to rejection state
 	for(i = 0; i < (*automaton)->stateTable.size; i++)
-		for(j = 0; j < (*automaton)->symbolTable.size; j++)
+		for(j = 0; j < (*automaton)->tokenTable.size; j++)
 			(*automaton)->production[i][j] = -1;
 	// clear all submachine calls
-	for(i = 0; i < (*automaton)->symbolTable.size; i++) {
+	for(i = 0; i < (*automaton)->tokenTable.size; i++) {
 		(*automaton)->submachine[0][i] = -1;
 		(*automaton)->submachine[1][i] = -1;
 	}
@@ -50,12 +50,12 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 	// read the transitions (productions and submachine calls)
 	getName(input, stateName);
 	while(stateName[0] != EOF) {
-		getName(input, symbol);
+		getName(input, token);
 		getName(input, nextStateName);
 
-		// get the indexes (current state, symbol consumed, next state)
+		// get the indexes (current state, token consumed, next state)
 		stateIndex = findIndex((*automaton)->stateTable, stateName);
-		symbolIndex = findIndex((*automaton)->symbolTable, symbol);
+		tokenIndex = findIndex((*automaton)->tokenTable, token);
 		nextStateIndex = findIndex((*automaton)->stateTable, nextStateName);
 
 		// verify validity
@@ -64,8 +64,8 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 			fflush(stdout);
 			exit(2);
 		}
-		else if(symbolIndex < 0) {
-			printf("ERROR: Symbol \"%s\" undefined.\n", symbol);
+		else if(tokenIndex < 0) {
+			printf("ERROR: Token \"%s\" undefined.\n", token);
 			fflush(stdout);
 			exit(2);
 		}
@@ -75,25 +75,15 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 			exit(2);
 		}
 		else { // set a new transition
-			if(isSubMachine(symbolIndex, (*automaton)->symbolTable)) {
-				getSubmachineName(symbolIndex, (*automaton)->symbolTable, submachineName);
+			if(isSubMachine(tokenIndex, (*automaton)->tokenTable)) {
+				getSubmachineName(tokenIndex, (*automaton)->tokenTable, submachineName);
 				(*automaton)->submachine[0][stateIndex] = findIndex(automataTable, submachineName);
 				(*automaton)->submachine[1][stateIndex] = nextStateIndex;
 			}
 			else
-				(*automaton)->production[stateIndex][symbolIndex] = nextStateIndex;
+				(*automaton)->production[stateIndex][tokenIndex] = nextStateIndex;
 		}
 
 		getName(input, stateName);
 	}
-/*
-	for(i = 0; i < (*automaton)->stateTable.size; i++){
-		for(j = 0; j < (*automaton)->symbolTable.size; j++)
-			printf("%d ", (*automaton)->production[i][j]);fflush(stdout);
-		printf("\n");fflush(stdout);}
-
-	for(i = 0; i < (*automaton)->symbolTable.size; i++) {
-		printf("%d %d\n", (*automaton)->submachine[0][i], (*automaton)->submachine[1][i]);fflush(stdout);
-	}
-	printf("\n");fflush(stdout);*/
 }

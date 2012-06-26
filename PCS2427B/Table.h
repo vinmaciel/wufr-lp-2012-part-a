@@ -22,7 +22,7 @@ void createTable(FILE* input, Table* table);
 int findIndex(Table table, char* name);
 void getName(FILE* input, char* newName);
 int isAcceptState(int indexState, Table stateTable);
-int isSubMachine(int indexSymbol, Table automataTable);
-void getSubmachineName(int indexMachine, Table symbolTable, char* name);
+int isSubMachine(int indexToken, Table automataTable);
+void getSubmachineName(int indexMachine, Table tokenTable, char* name);
 
 #endif /* TABLE_H_ */
