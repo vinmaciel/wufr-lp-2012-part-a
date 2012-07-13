@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include "Table.h"
-#include "StringManager.h"
+#include "Lexer.h"
 
 typedef struct {
 	Table tokenTable;

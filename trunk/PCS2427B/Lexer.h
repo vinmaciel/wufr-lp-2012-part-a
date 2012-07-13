@@ -5,8 +5,8 @@
  *      Author: Vinicius
  */
 
-#ifndef STRINGMANAGER_H_
-#define STRINGMANAGER_H_
+#ifndef LEXER_H_
+#define LEXER_H_
 
 #include <stdio.h>
 
@@ -17,12 +17,28 @@ typedef struct {
 
 typedef StringManagerStruct* StringManager;
 
+typedef char Token;
+
 void startStringManager(StringManager* manager);
 void getStringFromConsole(StringManager* manager);
 void getStringFromFile(StringManager* manager, FILE* file);
-int getToken(StringManager* manager, char* token);
-void recycleToken(StringManager* manager, char* token);
+Token getToken(StringManager* manager);
+void recycleToken(StringManager* manager, Token token);
 char* printString(StringManager manager);
 char* printToken(StringManager manager, int tokenSize);
 
-#endif /* STRINGMANAGER_H_ */
+
+/** TOKENS **/
+#define NULL_TOKEN 0
+#define NUMBER 'a'
+#define IDENTIFIER 'n'
+#define ADD_OPERATOR '+'
+#define SUB_OPERATOR '-'
+#define MULT_OPERATOR '*'
+#define DIV_OPERATOR '/'
+#define ASSIGNMENT_OPERATOR '='
+#define END_STATEMENT ';'
+#define PARENTHESES_L '('
+#define PARENTHESES_R ')'
+
+#endif /* LEXER_H_ */

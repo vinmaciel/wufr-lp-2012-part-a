@@ -18,6 +18,10 @@ void createTable(FILE* input, Table* table) {
 	fscanf(input, "%d", &(table->size));
 
 	table->elem = (char**) malloc((table->size)*sizeof(char*));
+	for(i = 0; i < table->size; i++) {
+		table->elem[i] = (char*) malloc((strlen(name)+1)*sizeof(char));
+		table->elem[i][0] = '\0';
+	}
 
 	for(i = 0; i < table->size; i++) {
 		getName(input, name);
@@ -27,8 +31,6 @@ void createTable(FILE* input, Table* table) {
 			fflush(stdout);
 			exit(1);
 		}
-
-		table->elem[i] = (char*) malloc((strlen(name)+1)*sizeof(char));
 
 		strcpy(table->elem[i], name);
 	}
@@ -43,6 +45,15 @@ int findIndex(Table table, char* name) {
 
 	if(node == 0 && i <= table.size) return --i;
 	else return -1;
+}
+
+int findTokenIndex(Table table, char token) {
+	char string[2];
+
+	string[0] = token;
+	string[1] = '\0';
+
+	return findIndex(table, string);
 }
 
 void getName(FILE* input, char* newName) {

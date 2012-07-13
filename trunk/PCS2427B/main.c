@@ -13,7 +13,7 @@
 #include "Automaton.h"
 #include "AutomataList.h"
 #include "Machine.h"
-#include "stringManager.h"
+#include "Lexer.h"
 
 int main() {
 	Machine machine;
