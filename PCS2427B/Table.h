@@ -20,6 +20,7 @@ typedef struct {
 
 void createTable(FILE* input, Table* table);
 int findIndex(Table table, char* name);
+int findTokenIndex(Table table, char token);
 void getName(FILE* input, char* newName);
 int isAcceptState(int indexState, Table stateTable);
 int isSubMachine(int indexToken, Table automataTable);

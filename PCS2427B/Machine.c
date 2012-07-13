@@ -57,8 +57,8 @@ void createMachine(FILE* input, Machine* machine) {
 int testString(Machine machine, StringManager* stringManager) {
 	int i, j;
 	int currentStateIndex, tokenIndex, nextStateIndex, currentAutomatonIndex;
-	int endOfString, noTransition, result;
-	char* token;
+	int noTransition, result;
+	Token token;
 	Automaton currentAutomaton;
 	AutomataStack stack;
 	FILE* log;
@@ -92,11 +92,10 @@ int testString(Machine machine, StringManager* stringManager) {
 		exit(4);
 	}
 
-	token = (char*) malloc(2*sizeof(char)); // only char
-	endOfString = 0;
+	token = NUMBER;
 	noTransition = 0;
 
-	for(nextStateIndex = 0; !endOfString && !noTransition && nextStateIndex >= 0; i++) {
+	for(nextStateIndex = 0; token && !noTransition && nextStateIndex >= 0; i++) {
 		currentStateIndex = nextStateIndex;
 
 		// log: store state of the machine
@@ -110,13 +109,14 @@ int testString(Machine machine, StringManager* stringManager) {
 		}
 
 		// get token
-		endOfString = getToken(stringManager, token);
-		tokenIndex = findIndex(currentAutomaton->tokenTable, token);
+		token = getToken(stringManager);
+		tokenIndex = findTokenIndex(currentAutomaton->tokenTable, token);
 
-		if(!endOfString) {
+		if(token) {
 			// do the production
-			if(tokenIndex >= 0)
+			if(tokenIndex >= 0){
 				nextStateIndex = currentAutomaton->production[currentStateIndex][tokenIndex];
+			}
 
 			/*
 			 * if the token doesn't belong to the machine OR
@@ -140,8 +140,9 @@ int testString(Machine machine, StringManager* stringManager) {
 						currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
 						fprintf(log, "<Pop>\n");
 					}
-					else
+					else {
 						noTransition = 1;
+					}
 				}
 
 				recycleToken(stringManager, token);
