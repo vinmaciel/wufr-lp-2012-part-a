@@ -56,9 +56,9 @@ void createMachine(FILE* input, Machine* machine) {
 
 int testString(Machine machine, StringManager* stringManager) {
 	int i, j;
-	int currentStateIndex, tokenIndex, nextStateIndex, currentAutomatonIndex;
-	int noTransition, result;
-	Token token;
+	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
+	int endOfString, noTransition, result;
+	char symbol[2];
 	Automaton currentAutomaton;
 	AutomataStack stack;
 	FILE* log;
@@ -78,7 +78,7 @@ int testString(Machine machine, StringManager* stringManager) {
 	log = fopen(logName, "a");
 
 	// log: write input string
-	fprintf(log, "\tInput string:\t%s\n\n", (*stringManager)->string);
+	if(log != NULL) fprintf(log, "\tInput string:\t%s\n\n", (*stringManager)->string);
 
 	// get an empty stack
 	newAutomataStack(&stack);
@@ -92,10 +92,10 @@ int testString(Machine machine, StringManager* stringManager) {
 		exit(4);
 	}
 
-	token = NUMBER;
+	endOfString = 0;
 	noTransition = 0;
 
-	for(nextStateIndex = 0; token && !noTransition && nextStateIndex >= 0; i++) {
+	for(nextStateIndex = 0; !endOfString && !noTransition && nextStateIndex >= 0; i++) {
 		currentStateIndex = nextStateIndex;
 
 		// log: store state of the machine
@@ -108,22 +108,21 @@ int testString(Machine machine, StringManager* stringManager) {
 			fflush(log);
 		}
 
-		// get token
-		token = getToken(stringManager);
-		tokenIndex = findTokenIndex(currentAutomaton->tokenTable, token);
+		// get symbol
+		endOfString = getSymbol(stringManager, symbol);
+		symbolIndex = findIndex(currentAutomaton->symbolTable, symbol);
 
-		if(token) {
+		if(!endOfString) {
 			// do the production
-			if(tokenIndex >= 0){
-				nextStateIndex = currentAutomaton->production[currentStateIndex][tokenIndex];
-			}
+			if(symbolIndex >= 0)
+				nextStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
 
 			/*
-			 * if the token doesn't belong to the machine OR
+			 * if the symbol doesn't belong to the machine OR
 			 * the production redirects to a rejection state
 			 * => verify if there is a submachine call in this state
 			 */
-			if(tokenIndex < 0 || nextStateIndex < 0) {
+			if(symbolIndex < 0 || nextStateIndex < 0) {
 				// enter the submachine
 				if(currentAutomaton->submachine[0][currentStateIndex] >= 0) {
 					pushAutomaton(&stack, currentAutomatonIndex, currentAutomaton->submachine[1][currentStateIndex]);
@@ -131,21 +130,20 @@ int testString(Machine machine, StringManager* stringManager) {
 					currentAutomatonIndex = currentAutomaton->submachine[0][currentStateIndex];
 					currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
 					nextStateIndex = 0;
-					fprintf(log, "<Push>\n");
+					if(log != NULL) fprintf(log, "<Push>\n");
 				}
 				// verify if there is a stacked submachine
 				else {
 					if(!isEmptyStack(stack) && isAcceptState(currentStateIndex, currentAutomaton->stateTable)) {
 						popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
 						currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
-						fprintf(log, "<Pop>\n");
+						if(log != NULL) fprintf(log, "<Pop>\n");
 					}
-					else {
+					else
 						noTransition = 1;
-					}
 				}
 
-				recycleToken(stringManager, token);
+				recycleSymbol(stringManager, symbol);
 			}
 		}
 	}
@@ -154,11 +152,13 @@ int testString(Machine machine, StringManager* stringManager) {
 	while(!isEmptyStack(stack) && nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable)) {
 		popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
 		currentAutomaton = getAutomatonByIndex(machine->automataList, currentAutomatonIndex);
-		fprintf(log, "<End-of-string... Popping>\n");
-		fprintf(log, "Machine: %s\n", machine->automataTable.elem[currentAutomatonIndex]);
-		fprintf(log, "State: %s\n", currentAutomaton->stateTable.elem[nextStateIndex]);
-		fprintf(log, "Stack size: %d\n", stackSize(stack));
-		fprintf(log, "---\n\n");
+		if(log != NULL) {
+			fprintf(log, "<End-of-string... Popping>\n");
+			fprintf(log, "Machine: %s\n", machine->automataTable.elem[currentAutomatonIndex]);
+			fprintf(log, "State: %s\n", currentAutomaton->stateTable.elem[nextStateIndex]);
+			fprintf(log, "Stack size: %d\n", stackSize(stack));
+			fprintf(log, "---\n\n");
+		}
 	}
 
 	// log: write ending state
@@ -173,17 +173,19 @@ int testString(Machine machine, StringManager* stringManager) {
 
 	// accept (or don't) the string
 	if(nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack)) {
-		fprintf(log, "ACCEPTED!");
+		if(log != NULL) fprintf(log, "ACCEPTED!");
 		result = 1;
 	}
 	else {
-		fprintf(log, "REJECTED!");
+		if(log != NULL) fprintf(log, "REJECTED!");
 		result = 0;
 	}
 
 	// log: close file
-	fprintf(log, "\n\n\n");
-	fclose(log);
+	if(log != NULL) {
+		fprintf(log, "\n\n\n");
+		fclose(log);
+	}
 
 	cleanAutomataStack(&stack);
 
