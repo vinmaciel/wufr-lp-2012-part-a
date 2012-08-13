@@ -11,12 +11,12 @@
 
 #include <stdio.h>
 #include "Table.h"
-#include "Lexer.h"
+#include "StringManager.h"
 
 typedef struct {
-	Table tokenTable;
+	Table symbolTable;
 	Table stateTable;
-	int** production;	// production[current_state][token] => next_state
+	int** production;	// production[current_state][symbol] => next_state
 	int* submachine[2];	// submachine[current_state] => (next_machine, next_state_after_return)
 } AutomatonStruct;
 

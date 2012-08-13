@@ -47,15 +47,6 @@ int findIndex(Table table, char* name) {
 	else return -1;
 }
 
-int findTokenIndex(Table table, char token) {
-	char string[2];
-
-	string[0] = token;
-	string[1] = '\0';
-
-	return findIndex(table, string);
-}
-
 void getName(FILE* input, char* newName) {
 	int i, quotes;
 	char letter;
@@ -96,17 +87,17 @@ int isAcceptState(int indexState, Table stateTable) {
 	return 0;
 }
 
-int isSubMachine(int indexToken, Table tokenTable) {
-	if(tokenTable.elem[indexToken][0] == '<' && tokenTable.elem[indexToken][strlen(tokenTable.elem[indexToken])-1] == '>')
+int isSubMachine(int indexSymbol, Table symbolTable) {
+	if(symbolTable.elem[indexSymbol][0] == '<' && symbolTable.elem[indexSymbol][strlen(symbolTable.elem[indexSymbol])-1] == '>')
 		return 1;
 
 	return 0;
 }
 
-void getSubmachineName(int indexMachine, Table tokenTable, char* name) {
+void getSubmachineName(int indexMachine, Table symbolTable, char* name) {
 	int i;
 
-	for(i = 1; tokenTable.elem[indexMachine][i] != '>'; i++)
-		name[i-1] = tokenTable.elem[indexMachine][i];
+	for(i = 1; symbolTable.elem[indexMachine][i] != '>'; i++)
+		name[i-1] = symbolTable.elem[indexMachine][i];
 	name[i-1] = '\0';
 }
