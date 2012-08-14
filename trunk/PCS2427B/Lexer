@@ -1,0 +1,50 @@
+39
+"0" "*a" "*n" "*+" "*-" "**" "*/" "*%" "*++" "*--" "*=" "*==" "*<" "*<<" "*<=" "*>" "*>>" "*>=" "*!" "*!=" "*?" "*:" "*~" "*&" "*&&" "*|" "*||" "*(" "*)" "*[" "*]" "*{" "*}" "*;" "*," "*." "*#" "COMMENT" "COMMENT_1"
+28
+" " "a" "_" "n" "+" "-" "*" "/" "%" "=" "<" ">" "!" "?" ":" "~" "&" "|" "(" ")" "[" "]" "{" "}" ";" "," "." "#"
+"0" " " "0"						; WHITESPACES
+"0" "a" "*a"
+"0" "_" "*a"
+"*a" "a" "*a"
+"*a" "_" "*a"
+"*a" "n" "*a"					; IDENTIFIERS
+"0" "n" "*n"
+"*n" "n" "*n"					; CONSTANTS
+"0" "+" "*+"					; ADD/INC
+"*+" "+" "*++"					; INC
+"0" "-" "*-"					; SUB/DEC
+"*-" "-" "*--"					; DEC
+"0" "*" "**"					; MULT
+"0" "%" "*%"					; MODULE
+"0" "/" "*/"					; DIVISION/COMMENT
+"*/" "*" "COMMENT"				; INIT COMMENT
+"COMMENT" "*" "COMMENT_1"		; COMMENT SEC STAR
+"COMMENT" "OTHERS" "COMMENT"	; (COMMENT)
+"COMMENT_1" "/" "0"				; END COMMENT
+"0" "=" "*="					; ASSING/EQUALS
+"*=" "=" "*=="					; EQUALS
+"0" "<" "*<"					; LESS/LESS_EQ/SHIFT_L
+"*<" "<" "*<<"					; SHIFT_L
+"*<" "=" "*<="					; LESS_EQ
+"0" ">" "*>"					; GREATER/GREATER_EQ/SHIFT_R
+"*>" ">" "*>>"					; SHIFT_R
+"*>" "=" "*>="					; GREATER_EQ
+"0" "!" "*!"					; NOT
+"*!" "=" "*!="					; DIFFERENT
+"0" "?" "*?"					; IF_THEN
+"0" ":" "*:"					; IF_ELSE
+"0" "~" "*~"					; NOT_B
+"0" "&" "*&"					; AND_B
+"*&" "&" "*&&"					; AND
+"0" "|" "*|"					; OR_B
+"*|" "|" "*||"					; OR
+"0" "(" "*("
+"0" ")" "*("					; PARENTHESES
+"0" "[" "*["
+"0" "]" "*]"					; BRACKETS
+"0" "{" "*{"
+"0" "}" "*}"					; BRACES
+"0" ";" "*;"					; END_EXP
+"0" "," "*,"					; SEPARATOR
+"0" "." "*."					; INTERPUNCT
+"0" "#" "*#"					; HASH
