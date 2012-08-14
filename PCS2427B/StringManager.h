@@ -20,8 +20,8 @@ typedef StringManagerStruct* StringManager;
 void startStringManager(StringManager* manager);
 void getStringFromConsole(StringManager* manager);
 void getStringFromFile(StringManager* manager, FILE* file);
-int getSymbol(StringManager* manager, char* symbol);
-void recycleSymbol(StringManager* manager, char* symbol);
+char getSymbol(StringManager* manager);
+void recycleSymbol(StringManager* manager);
 char* printString(StringManager manager);
 
 #endif /* STRINGMANAGER_H_ */

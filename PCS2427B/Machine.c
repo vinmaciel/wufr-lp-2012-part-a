@@ -34,7 +34,6 @@ void createMachine(FILE* input, Machine* machine) {
 		automatonFileName[0] = '\0';
 
 		strcpy(automatonFileName, (*machine)->automataTable.elem[i]);
-		strcat(automatonFileName, ".txt");
 
 		automatonFile = fopen(automatonFileName, "r");
 
@@ -57,7 +56,7 @@ void createMachine(FILE* input, Machine* machine) {
 int testString(Machine machine, StringManager* stringManager) {
 	int i, j;
 	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
-	int endOfString, noTransition, result;
+	int noTransition, result;
 	char symbol[2];
 	Automaton currentAutomaton;
 	AutomataStack stack;
@@ -92,10 +91,11 @@ int testString(Machine machine, StringManager* stringManager) {
 		exit(4);
 	}
 
-	endOfString = 0;
+	symbol[0] = 1;
+	symbol[1] = '\0';
 	noTransition = 0;
 
-	for(nextStateIndex = 0; !endOfString && !noTransition && nextStateIndex >= 0; i++) {
+	for(nextStateIndex = 0; symbol[0] && !noTransition && nextStateIndex >= 0; i++) {
 		currentStateIndex = nextStateIndex;
 
 		// log: store state of the machine
@@ -109,10 +109,10 @@ int testString(Machine machine, StringManager* stringManager) {
 		}
 
 		// get symbol
-		endOfString = getSymbol(stringManager, symbol);
+		symbol[0] = getSymbol(stringManager);
 		symbolIndex = findIndex(currentAutomaton->symbolTable, symbol);
 
-		if(!endOfString) {
+		if(symbol[0]) {
 			// do the production
 			if(symbolIndex >= 0)
 				nextStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
@@ -143,7 +143,7 @@ int testString(Machine machine, StringManager* stringManager) {
 						noTransition = 1;
 				}
 
-				recycleSymbol(stringManager, symbol);
+				recycleSymbol(stringManager);
 			}
 		}
 	}

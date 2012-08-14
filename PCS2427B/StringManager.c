@@ -20,12 +20,16 @@ void startStringManager(StringManager* manager) {
 }
 
 void getStringFromFile(StringManager* manager, FILE* file) {
+	int i;
 	char newString[1024];
 
 	fgets(newString, 1023, file);
 
 	(*manager)->string = (char*) malloc((strlen(newString)+1)*sizeof(char));
 	(*manager)->index = 0;
+
+	for(i = 0; i < strlen(newString); i++)
+		if(iscntrl(newString[i])) newString[i] = '\0';
 
 	strcpy((*manager)->string, newString);
 }
@@ -34,22 +38,27 @@ void getStringFromFile(StringManager* manager, FILE* file) {
  * returns 1 if end-of-string
  * returns 0 otherwise
  */
-int getSymbol(StringManager* manager, char* symbol) {
+char getSymbol(StringManager* manager) {
+	char symbol;
+
 	// only gets a char
-	for(symbol[0] = (*manager)->string[(*manager)->index]; isspace(symbol[0]); (*manager)->index++)
-		symbol[0] = (*manager)->string[(*manager)->index];
-	symbol[1] = '\0';
+	for(symbol = (*manager)->string[(*manager)->index]; isspace(symbol); (*manager)->index++)
+		symbol = (*manager)->string[(*manager)->index];
 
 	(*manager)->index++;
 
-	if(iscntrl(symbol[0]))
-		return 1;
-
-	return 0;
+	if(isalpha(symbol))
+		return 'a';
+	if(isdigit(symbol))
+		return 'n';
+	if(iscntrl(symbol))
+		return 0;
+	else
+		return symbol;
 }
 
-void recycleSymbol(StringManager* manager, char* symbol) {
-	(*manager)->index -= strlen(symbol);
+void recycleSymbol(StringManager* manager) {
+	(*manager)->index--;
 }
 
 char* printString(StringManager manager) {
