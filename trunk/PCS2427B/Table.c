@@ -61,7 +61,7 @@ void getName(FILE* input, char* newName) {
 			return;
 		}
 
-		if(letter == '"')
+		if(letter == '\'')
 			if(quotes == 0) {
 				quotes = 1;
 				i--;

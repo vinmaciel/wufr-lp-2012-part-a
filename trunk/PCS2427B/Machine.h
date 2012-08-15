@@ -18,7 +18,7 @@ typedef struct {
 
 typedef MachineStruct* Machine;
 
-void createMachine(FILE* input, Machine* machine);
+void createMachine(Machine* machine);
 int testString(Machine machine, StringManager* stringManager);
 
 #endif /* MACHINE_H_ */

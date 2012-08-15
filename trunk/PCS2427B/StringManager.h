@@ -21,6 +21,7 @@ void startStringManager(StringManager* manager);
 void getStringFromConsole(StringManager* manager);
 void getStringFromFile(StringManager* manager, FILE* file);
 char getSymbol(StringManager* manager);
+char getChar(FILE* input);
 void recycleSymbol(StringManager* manager);
 char* printString(StringManager manager);
 
