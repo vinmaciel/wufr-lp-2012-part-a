@@ -57,6 +57,25 @@ char getSymbol(StringManager* manager) {
 		return symbol;
 }
 
+char getChar(FILE* input) {
+	char symbol;
+
+	for(symbol = getc(input); isspace(symbol); symbol = getc(input))
+		printf("%x ", symbol);
+
+	printf("%x ", symbol);
+	fflush(stdout);
+
+	if(isalpha(symbol))
+		return 'a';
+	if(isdigit(symbol))
+		return 'n';
+	if(iscntrl(symbol))
+		return 0;
+	else
+		return symbol;
+}
+
 void recycleSymbol(StringManager* manager) {
 	(*manager)->index--;
 }

@@ -14,11 +14,20 @@
 #include "AutomataList.h"
 #include "AutomataStack.h"
 
-void createMachine(FILE* input, Machine* machine) {
+void createMachine(Machine* machine) {
 	int i;
-	char automatonFileName[64];
+	char automatonFileName[64], fileName[64];
 	Automaton automaton;
-	FILE* automatonFile;
+	FILE *automatonFile, *input;
+
+	// get automaton file
+	input = NULL;
+	while (input == NULL) {
+		printf("Enter automaton file name:\n");
+		fflush(stdout);
+		gets(fileName);
+		input = fopen(fileName, "r");
+	}
 
 	// create free list
 	newFreeList();
@@ -45,14 +54,24 @@ void createMachine(FILE* input, Machine* machine) {
 		else
 			createGraph(automatonFile, &automaton, (*machine)->automataTable);
 
-		printf("Automaton \"%s\" created successfully.\n", (*machine)->automataTable.elem[i]);
-		fflush(stdout);
 		fclose(automatonFile);
 
 		addAutomatonToList(&((*machine)->automataList), automaton);
+
+		printf("Automaton \"%s\" created successfully.\n", (*machine)->automataTable.elem[i]);
+		fflush(stdout);
 	}
+
+	fclose(input);
+
+	printf("Machine loaded successfully.\n\n");
+	fflush(stdout);
 }
 
+/*
+ * Verifies if string from stringManager is accepted by the automaton described at the machine.
+ * @return 1 if it accepts, 0 otherwise.
+ */
 int testString(Machine machine, StringManager* stringManager) {
 	int i, j;
 	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
@@ -172,7 +191,7 @@ int testString(Machine machine, StringManager* stringManager) {
 	}
 
 	// accept (or don't) the string
-	if(nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack)) {
+	if(!symbol[0] && nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack)) {
 		if(log != NULL) fprintf(log, "ACCEPTED!");
 		result = 1;
 	}
@@ -191,3 +210,4 @@ int testString(Machine machine, StringManager* stringManager) {
 
 	return result;
 }
+

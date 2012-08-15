@@ -16,61 +16,19 @@
 #include "StringManager.h"
 
 int main() {
-	Machine machine;
-	FILE* input;
-	StringManager stringManager;
+	Automaton lexer;
 	char fileName[64];
-
-	// initiate string manager
-	startStringManager(&stringManager);
-
-	// get automaton file
-	input = NULL;
-	while (input == NULL) {
-		printf("Enter automaton file name:\n");
-		fflush(stdout);
-		gets(fileName);
-		input = fopen(fileName, "r");
-	}
+	FILE* input;
 
 	// create the automaton
-	createMachine(input, &machine);
+	input = fopen("Lexer", "r");
+	createAutomaton(input, &lexer);
 
-	// close automaton file
-	fclose(input);
-	printf("Machine loaded successfully.\n\n");
-	fflush(stdout);
-
-	// choose input mode
+	// get input file name
 	printf("Enter input file name:\n");
 	fflush(stdout);
 	gets(fileName);
-
-	// get a new string from file
-	input = fopen(fileName, "r");
-	while(input == NULL) {
-		printf("ERROR: input file not found. Choose a new one:\n");
-		fflush(stdout);
-		gets(fileName);
-		input = fopen(fileName, "r");
-	}
-
-	getStringFromFile(&stringManager, input);
-
-	while(1) {
-		if(testString(machine, &stringManager))
-			printf("\nString \"%s\" accepted by the automaton.\n", stringManager->string);
-		else
-			printf("\nString \"%s\" not accepted by the automaton.\n", stringManager->string);
-		fflush(stdout);
-
-		getStringFromFile(&stringManager, input);
-
-		if(feof(input))
-			break;
-	}
-
-	fclose(input);
+	generateTokenFile(lexer, fileName);
 
 	system("PAUSE");
 
