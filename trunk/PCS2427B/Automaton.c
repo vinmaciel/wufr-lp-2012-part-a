@@ -173,8 +173,8 @@ void generateTokenFile(Automaton lexer, const char* inputFileName) {
 		system("PAUSE");
 		exit(3);
 	}
-	strcpy(fileName, "token.");
-	strcat(fileName, inputFileName);
+	strcpy(fileName, inputFileName);
+	strcat(fileName, ".token");
 	output = fopen(fileName, "w");
 	if(output == NULL) {
 		printf("ERROR: cannot create output file.\n");
