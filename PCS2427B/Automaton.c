@@ -158,11 +158,11 @@ void createAutomaton(FILE* input, Automaton* automaton) {
 	fflush(stdout);
 }
 
-void generateTokenFile(Automaton lexer, const char* inputFileName) {
+void generateToken(Automaton lexer, const char* inputFileName) {
 	int currentStateIndex, nextStateIndex, symbolIndex;
-	char symbol[2];
-	char recycled;
-	int linefeed;
+	char currentString[128], symbol[2];
+	char currentCharacter, recycled;
+	int index;
 	char fileName[64];
 	FILE *input, *output;
 
@@ -186,31 +186,42 @@ void generateTokenFile(Automaton lexer, const char* inputFileName) {
 	// initiate symbol
 	symbol[0] = 1;
 	symbol[1] = '\0';
+	currentString[0] = '\0';
 	recycled = 0;
-	linefeed = 0;
 
 	for(currentStateIndex = 0; symbol[0] != EOF; currentStateIndex = nextStateIndex) {
+		if(!currentStateIndex)	index = 0;
+
 		// get a symbol
 		if(!recycled)
-			symbol[0] = getc(input);
+			currentCharacter = getc(input);
 		else
-			symbol[0] = recycled;
+			currentCharacter = recycled;
 
-		linefeed = 0;
-
-		if(isalpha(symbol[0]))
+		if(isalpha(currentCharacter))
 			symbol[0] = 'a';
-		if(isdigit(symbol[0]))
+		/*else if(currentCharacter == '\'')
+			while(currentCharacter == '\'' || currentCharacter == EOF) {
+				currentCharacter = getc(input);
+				if(currentCharacter == EOF) {
+					fprintf(output, "<ERROR: Symbol \"%c\" (%x) undefined>\n", symbol[0], symbol[0]); fflush(output);
+					printf("ERROR: Symbol \"%c\" undefined for the lexical analyzer.\n", symbol[0]); fflush(stdout);
+					system("PAUSE");
+					exit(2);
+				}
+
+				symbol[0] = 'n';
+			}*/
+		else if(isdigit(currentCharacter))
 			symbol[0] = 'n';
-		if(isspace(symbol[0])) {
-			if(symbol[0] == '\n')
-				linefeed = 1;
+		else if(isspace(currentCharacter))
 			symbol[0] = ' ';
-		}
-		if(iscntrl(symbol[0]))
+		else if(iscntrl(currentCharacter))
 			symbol[0] = 0;
-		if(symbol[0] == '\\' || symbol[0] == '\'' || symbol[0] == '@')
+		else if(currentCharacter == '@' || currentCharacter == '$')
 			symbol[0] = 's';
+		else
+			symbol[0] = currentCharacter;
 
 		recycled = 0;
 
@@ -234,12 +245,16 @@ void generateTokenFile(Automaton lexer, const char* inputFileName) {
 
 		// if next state doesn't allow the creation of a new token, return token and restart
 		if(nextStateIndex < 0) {
-			fprintf(output, "%s ", lexer->stateTable.elem[currentStateIndex] + 1);
-			if(linefeed) fprintf(output, "\n");
+			currentString[index] = '\0';
+			fprintf(output, "%s\t%s\n", lexer->stateTable.elem[currentStateIndex] + 1, currentString);
 			fflush(output);
-			recycled = symbol[0];
+
+			recycled = currentCharacter;
 			nextStateIndex = 0;
 		}
+
+		currentString[index] = currentCharacter;
+		index++;
 	}
 
 	fclose(input);
