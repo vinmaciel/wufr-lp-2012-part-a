@@ -25,4 +25,20 @@ char getChar(FILE* input);
 void recycleSymbol(StringManager* manager);
 char* printString(StringManager manager);
 
+
+/*** TOKEN ***
+ * NULL
+ * IDENTIFIER
+ * KEYWORD
+ * CONSTANT
+ * (OPERATOR)
+ * PUNCTUATOR
+ * STRING
+ *************/
+
+typedef struct {
+	char type[16];
+	char value[128];
+} Token;
+
 #endif /* STRINGMANAGER_H_ */

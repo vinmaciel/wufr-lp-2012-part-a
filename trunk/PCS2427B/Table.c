@@ -61,20 +61,32 @@ void getName(FILE* input, char* newName) {
 			return;
 		}
 
-		if(letter == '\'')
-			if(quotes == 0) {
-				quotes = 1;
-				i--;
+		if(quotes == 1) {
+			if(letter == '\\') {
+				letter = fgetc(input);
+
+				if(letter == '*' || letter == '\\' || letter == '\'')
+					name[i] = letter;
+				else {
+					name[i++] = '\'';
+					name[i] = letter;
+				}
 			}
-			else {
+			else if(letter == '\'') {
 				name[i] = '\0';
 				i = NAME_LENGTH;
 			}
-		else
-			if(quotes != 1)
-				i--;
 			else
 				name[i] = letter;
+		}
+		else {
+			if(letter == '\'') {
+				quotes = 1;
+				i--;
+			}
+			else
+				i--;
+		}
 	}
 
 	strcpy(newName, name);
