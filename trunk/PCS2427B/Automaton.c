@@ -162,7 +162,7 @@ void generateToken(Automaton lexer, const char* inputFileName) {
 	int currentStateIndex, nextStateIndex, symbolIndex;
 	char currentString[128], symbol[2];
 	char currentCharacter, recycled;
-	int index;
+	int index, threshold;
 	char fileName[64];
 	FILE *input, *output;
 
@@ -190,7 +190,10 @@ void generateToken(Automaton lexer, const char* inputFileName) {
 	recycled = 0;
 
 	for(currentStateIndex = 0; symbol[0] != EOF; currentStateIndex = nextStateIndex) {
-		if(!currentStateIndex)	index = 0;
+		if(!currentStateIndex) {
+			index = 0;
+			threshold = 0;
+		}
 
 		// get a symbol
 		if(!recycled)
@@ -245,16 +248,34 @@ void generateToken(Automaton lexer, const char* inputFileName) {
 
 		// if next state doesn't allow the creation of a new token, return token and restart
 		if(nextStateIndex < 0) {
-			currentString[index] = '\0';
-			fprintf(output, "%s\t%s\n", lexer->stateTable.elem[currentStateIndex] + 1, currentString);
-			fflush(output);
+			if(threshold) {
+				fprintf(output, "<ERROR: Symbol \"%s\" larger than 256>\n", currentString); fflush(output);
+				printf("ERROR: Symbol \"%s\" larger than 256.\n", currentString); fflush(stdout);
+				system("PAUSE");
+				exit(2);
+			}
+			else if(isAcceptState(currentStateIndex, lexer->stateTable)) {
+				currentString[index] = '\0';
+				fprintf(output, "%s\t%s\n", lexer->stateTable.elem[currentStateIndex] + 1, currentString);
+				fflush(output);
 
-			recycled = currentCharacter;
-			nextStateIndex = 0;
+				recycled = currentCharacter;
+				nextStateIndex = 0;
+			}
+			else {
+				fprintf(output, "<ERROR: Token \"%s\" undefined>\n", lexer->stateTable.elem[currentStateIndex]); fflush(output);
+				printf("ERROR: Token \"%s\" undefined for the lexical analyzer.\n", lexer->stateTable.elem[currentStateIndex]); fflush(stdout);
+				system("PAUSE");
+				exit(2);
+			}
 		}
 
-		currentString[index] = currentCharacter;
-		index++;
+		if(index < 127) {
+			currentString[index] = currentCharacter;
+			index++;
+		}
+		else
+			threshold = 1;
 	}
 
 	fclose(input);
