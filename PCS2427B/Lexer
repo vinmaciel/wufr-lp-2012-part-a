@@ -81,6 +81,7 @@
 'STRING_1' 'a' 'STRING_0'
 'STRING_1' '"' 'STRING_0'
 'STRING_1' '\'' 'STRING_0'
+'STRING_1' '\\' 'STRING_0'
 'STRING_0' '"' '*STRING'		; STRING_LITERAL
 '0' '+' '*+'					; ADD/INC
 '*+' '+' '*++'					; INC

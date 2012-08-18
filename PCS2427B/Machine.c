@@ -190,7 +190,7 @@ int testString(Machine machine, StringManager* stringManager) {
 		fprintf(log, "Stack size: %d\n", stackSize(stack));
 	}
 
-	// accept (or don't) the string
+	// accept (or do not) the string
 	if(!symbol[0] && nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack)) {
 		if(log != NULL) fprintf(log, "ACCEPTED!");
 		result = 1;

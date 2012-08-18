@@ -93,7 +93,7 @@ void getName(FILE* input, char* newName) {
 }
 
 int isAcceptState(int indexState, Table stateTable) {
-	if(stateTable.elem[indexState][0] == '*')
+	if(stateTable.elem[indexState][0] == '*' && strlen(stateTable.elem[indexState]) > 1)
 		return 1;
 
 	return 0;
