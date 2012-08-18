@@ -158,11 +158,106 @@ void createAutomaton(FILE* input, Automaton* automaton) {
 	fflush(stdout);
 }
 
-void generateToken(Automaton lexer, const char* inputFileName) {
+/*
+ * Generate a token based on an input file in C language.
+ *
+ * @return 0 if a valid token is generated
+ * @return -1 if symbol undefined at lexer
+ * @return -2 if symbol (not comment) larger than 256
+ * @return -3 if end state is not accept state (valid token)
+ */
+int generateToken(FILE* input, Automaton lexer, char* recycled, Token* token) {
 	int currentStateIndex, nextStateIndex, symbolIndex;
 	char currentString[128], symbol[2];
-	char currentCharacter, recycled;
+	char currentCharacter;
 	int index, threshold;
+
+	// initiate symbol
+	symbol[0] = 1;
+	symbol[1] = '\0';
+	currentString[0] = '\0';
+
+	for(currentStateIndex = 0; symbol[0] != EOF; currentStateIndex = nextStateIndex) {
+		if(!currentStateIndex) {
+			index = 0;
+			threshold = 0;
+		}
+
+		// get a symbol
+		if(!(*recycled))
+			currentCharacter = getc(input);
+		else
+			currentCharacter = *recycled;
+
+		if(isalpha(currentCharacter))
+			symbol[0] = 'a';
+		else if(isdigit(currentCharacter))
+			symbol[0] = 'n';
+		else if(isspace(currentCharacter))
+			symbol[0] = ' ';
+		else if(iscntrl(currentCharacter))
+			symbol[0] = 0;
+		else if(currentCharacter == '@' || currentCharacter == '$')
+			symbol[0] = 's';
+		else
+			symbol[0] = currentCharacter;
+
+		*recycled = 0;
+
+		// if not EOF
+		if(symbol[0] != EOF) {
+			// get symbol index
+			symbolIndex = findIndex(lexer->symbolTable, symbol);
+
+			// if symbol exists in the alphabet, try the production
+			if(symbolIndex >= 0)
+				nextStateIndex = lexer->production[currentStateIndex][symbolIndex];
+			// else, ERROR
+			else {
+				*recycled = symbol[0];
+				return -1;
+			}
+		}
+		else {
+			*recycled = EOF;
+			return 1;
+		}
+
+		// if next state doesn't allow the creation of a new token, return token and restart
+		if(nextStateIndex < 0) {
+			if(threshold) {
+				strcpy((*token)->value, currentString);
+				return -2;
+			}
+			else if(isAcceptState(currentStateIndex, lexer->stateTable)) {
+				currentString[index] = '\0';
+
+				strcpy((*token)->type, lexer->stateTable.elem[currentStateIndex] + 1);
+				strcpy((*token)->value, currentString);
+
+				*recycled = currentCharacter;
+				return 0;
+			}
+			else {
+				strcpy((*token)->value, lexer->stateTable.elem[currentStateIndex]);
+				return -3;
+			}
+		}
+
+		if(index < 127) {
+			currentString[index] = currentCharacter;
+			index++;
+		}
+		else
+			threshold = 1;
+	}
+
+	return -4;
+}
+
+void consumeFile(Automaton lexer, const char* inputFileName) {
+	char recycled = 0;
+	Token token;
 	char fileName[64];
 	FILE *input, *output;
 
@@ -183,99 +278,45 @@ void generateToken(Automaton lexer, const char* inputFileName) {
 		exit(5);
 	}
 
-	// initiate symbol
-	symbol[0] = 1;
-	symbol[1] = '\0';
-	currentString[0] = '\0';
-	recycled = 0;
+	createToken(&token);
 
-	for(currentStateIndex = 0; symbol[0] != EOF; currentStateIndex = nextStateIndex) {
-		if(!currentStateIndex) {
-			index = 0;
-			threshold = 0;
+	while(recycled != EOF) {
+		switch(generateToken(input, lexer, &recycled, &token)) {
+		case 0:
+			fprintf(output, "%s\t%s\n", token->type, token->value);
+			fflush(output);
+			break;
+
+		case 1:
+			break;
+
+		case -1:
+			fprintf(output, "<ERROR: Symbol \"%c\" (%x) undefined>\n", recycled, recycled); fflush(output);
+			printf("ERROR: Symbol \"%c\" undefined for the lexical analyzer.\n", recycled); fflush(stdout);
+			system("PAUSE");
+			exit(2);
+			break;
+
+		case -2:
+			fprintf(output, "<ERROR: Symbol \"%s\" larger than 256>\n", token->value); fflush(output);
+			printf("ERROR: Symbol \"%s\" larger than 256.\n", token->value); fflush(stdout);
+			system("PAUSE");
+			exit(2);
+			break;
+
+		case -3:
+			fprintf(output, "<ERROR: Token \"%s\" undefined>\n", token->value); fflush(output);
+			printf("ERROR: Token \"%s\" undefined for the lexical analyzer.\n", token->value); fflush(stdout);
+			system("PAUSE");
+			exit(2);
+			break;
+
+		case -4:
+			printf("ERROR: unknown.\n"); fflush(stdout);
+			system("PAUSE");
+			exit(3);
+			break;
 		}
-
-		// get a symbol
-		if(!recycled)
-			currentCharacter = getc(input);
-		else
-			currentCharacter = recycled;
-
-		if(isalpha(currentCharacter))
-			symbol[0] = 'a';
-		/*else if(currentCharacter == '\'')
-			while(currentCharacter == '\'' || currentCharacter == EOF) {
-				currentCharacter = getc(input);
-				if(currentCharacter == EOF) {
-					fprintf(output, "<ERROR: Symbol \"%c\" (%x) undefined>\n", symbol[0], symbol[0]); fflush(output);
-					printf("ERROR: Symbol \"%c\" undefined for the lexical analyzer.\n", symbol[0]); fflush(stdout);
-					system("PAUSE");
-					exit(2);
-				}
-
-				symbol[0] = 'n';
-			}*/
-		else if(isdigit(currentCharacter))
-			symbol[0] = 'n';
-		else if(isspace(currentCharacter))
-			symbol[0] = ' ';
-		else if(iscntrl(currentCharacter))
-			symbol[0] = 0;
-		else if(currentCharacter == '@' || currentCharacter == '$')
-			symbol[0] = 's';
-		else
-			symbol[0] = currentCharacter;
-
-		recycled = 0;
-
-		// if not EOF
-		if(symbol[0] != EOF) {
-			// get symbol index
-			symbolIndex = findIndex(lexer->symbolTable, symbol);
-
-			// if symbol exists in the alphabet, try the production
-			if(symbolIndex >= 0)
-				nextStateIndex = lexer->production[currentStateIndex][symbolIndex];
-			// else, ERROR
-			else {
-				fprintf(output, "<ERROR: Symbol \"%c\" (%x) undefined>\n", symbol[0], symbol[0]); fflush(output);
-				printf("ERROR: Symbol \"%c\" undefined for the lexical analyzer.\n", symbol[0]); fflush(stdout);
-				system("PAUSE");
-				exit(2);
-			}
-
-		}
-
-		// if next state doesn't allow the creation of a new token, return token and restart
-		if(nextStateIndex < 0) {
-			if(threshold) {
-				fprintf(output, "<ERROR: Symbol \"%s\" larger than 256>\n", currentString); fflush(output);
-				printf("ERROR: Symbol \"%s\" larger than 256.\n", currentString); fflush(stdout);
-				system("PAUSE");
-				exit(2);
-			}
-			else if(isAcceptState(currentStateIndex, lexer->stateTable)) {
-				currentString[index] = '\0';
-				fprintf(output, "%s\t%s\n", lexer->stateTable.elem[currentStateIndex] + 1, currentString);
-				fflush(output);
-
-				recycled = currentCharacter;
-				nextStateIndex = 0;
-			}
-			else {
-				fprintf(output, "<ERROR: Token \"%s\" undefined>\n", lexer->stateTable.elem[currentStateIndex]); fflush(output);
-				printf("ERROR: Token \"%s\" undefined for the lexical analyzer.\n", lexer->stateTable.elem[currentStateIndex]); fflush(stdout);
-				system("PAUSE");
-				exit(2);
-			}
-		}
-
-		if(index < 127) {
-			currentString[index] = currentCharacter;
-			index++;
-		}
-		else
-			threshold = 1;
 	}
 
 	fclose(input);
