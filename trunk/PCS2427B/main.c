@@ -28,7 +28,7 @@ int main() {
 	printf("Enter input file name:\n");
 	fflush(stdout);
 	gets(fileName);
-	generateToken(lexer, fileName);
+	consumeFile(lexer, fileName);
 
 	system("PAUSE");
 

@@ -39,6 +39,10 @@ char* printString(StringManager manager);
 typedef struct {
 	char type[16];
 	char value[128];
-} Token;
+} TokenStruct;
+
+typedef TokenStruct* Token;
+
+void createToken(Token* token);
 
 #endif /* STRINGMANAGER_H_ */
