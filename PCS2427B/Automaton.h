@@ -25,7 +25,7 @@ typedef AutomatonStruct* Automaton;
 void createGraph(FILE* input, Automaton* automaton, Table automataTable);
 void createAutomaton(FILE* input, Automaton* automaton);
 int generateToken(FILE* input, Automaton lexer, char* recycled, Token* token);
-void consumeFile(Automaton lexer, const char* inputFileName);
+void consumeFile(Automaton lexer, Table keywords, const char* inputFileName);
 
 
 #endif /* GRAPH_H_ */

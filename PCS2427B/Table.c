@@ -113,3 +113,39 @@ void getSubmachineName(int indexMachine, Table symbolTable, char* name) {
 		name[i-1] = symbolTable.elem[indexMachine][i];
 	name[i-1] = '\0';
 }
+
+
+void createDynamicTable(DynamicTable* table) {
+	*table = NULL;
+}
+
+void addToTable(DynamicTable* table, const char* name) {
+	DynamicTable newCell, search;
+
+	search = lookUpForCell(*table, name);
+
+	if(search == NULL) {
+		newCell = (DynamicTableNode*) malloc(sizeof(DynamicTableNode));
+
+		newCell->name = (char*) malloc((strlen(name)+1)*sizeof(char));
+		strcpy(newCell->name, name);
+
+		newCell->next = NULL;
+
+		if(*table == NULL)
+			*table = newCell;
+		else {
+			for(search = *table; search->next != NULL; search = search->next);
+
+			search->next = newCell;
+		}
+	}
+}
+
+DynamicTable lookUpForCell(DynamicTable table, const char* name) {
+	DynamicTable search;
+
+	for(search = table; search != NULL && strcmp(search->name, name); search = search->next);
+
+	return search;
+}

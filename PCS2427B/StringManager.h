@@ -29,7 +29,7 @@ char* printString(StringManager manager);
 /*** TOKEN ***
  * NULL
  * IDENTIFIER
- * KEYWORD
+ * (KEYWORD)
  * CONSTANT
  * (OPERATOR)
  * PUNCTUATOR
@@ -37,7 +37,7 @@ char* printString(StringManager manager);
  *************/
 
 typedef struct {
-	char type[16];
+	char type[17];
 	char value[128];
 } TokenStruct;
 
