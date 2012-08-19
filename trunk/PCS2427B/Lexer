@@ -1,13 +1,13 @@
-36
-'0' '*IDENTIFIER' '*CONSTANT' '*+' '*-' '**' '*/' '*%' '*++' '*--' '*=' '*==' '*<' '*<<' '*<=' '*>' '*>>' '*>=' '*!' '*!=' '*?' '*:' '*~' '*&' '*&&' '*|' '*||' '*PUNCTUATOR' 'CHAR_0' 'CHAR' 'CHAR_CNTRL' 'STRING_0' 'STRING_1' '*STRING' 'COMMENT' 'COMMENT_1'
-32
-' ' 'a' '_' 'n' '+' '-' '*' '/' '%' '=' '<' '>' '!' '?' ':' '~' '&' '|' '(' ')' '[' ']' '{' '}' ';' ',' '.' '#' '"' 's' '\'' '\\'
+38
+'0' '*IDENTIFIER' 'KEYWORD' '*CONSTANT' '*+' '*-' '**' '*/' '*%' '*++' '*--' '*=' '*==' '*<' '*<<' '*<=' '*>' '*>>' '*>=' '*!' '*!=' '*?' '*:' '*~' '*^' '*&' '*&&' '*|' '*||' '*PUNCTUATOR' 'CHAR_0' 'CHAR' 'CHAR_CNTRL' 'STRING_0' 'STRING_1' '*STRING' 'COMMENT' 'COMMENT_1'
+33
+' ' 'a' '_' 'n' '+' '-' '*' '/' '%' '=' '<' '>' '!' '?' ':' '~' '^' '&' '|' '(' ')' '[' ']' '{' '}' ';' ',' '.' '#' '"' 's' '\'' '\\'
 '0' ' ' '0'						; WHITESPACES
 '0' 'a' '*IDENTIFIER'
 '0' '_' '*IDENTIFIER'
 '*IDENTIFIER' 'a' '*IDENTIFIER'
 '*IDENTIFIER' '_' '*IDENTIFIER'
-'*IDENTIFIER' 'n' '*IDENTIFIER'					; IDENTIFIERS
+'*IDENTIFIER' 'n' '*IDENTIFIER'	; IDENTIFIERS
 '0' '\'' 'CHAR_0'
 'CHAR_0' ' ' 'CHAR'
 'CHAR_0' 'a' 'CHAR'
@@ -45,7 +45,7 @@
 'CHAR_CNTRL' '\\' 'CHAR'
 'CHAR' '\'' '*CONSTANT'
 '0' 'n' '*CONSTANT'
-'*CONSTANT' 'n' '*CONSTANT'					; CONSTANTS
+'*CONSTANT' 'n' '*CONSTANT'		; CONSTANTS
 '0' '"' 'STRING_0'
 'STRING_0' ' ' 'STRING_0'
 'STRING_0' 'a' 'STRING_0'
@@ -121,7 +121,7 @@
 'COMMENT' '"' 'COMMENT'	
 'COMMENT' 's' 'COMMENT'
 'COMMENT' '\'' 'COMMENT'
-'COMMENT' '\\' 'COMMENT'			; (COMMENT)
+'COMMENT' '\\' 'COMMENT'		; (COMMENT)
 'COMMENT' '*' 'COMMENT_1'		; COMMENT SEC STAR
 'COMMENT_1' ' ' 'COMMENT'
 'COMMENT_1' 'a' 'COMMENT'
@@ -152,7 +152,7 @@
 'COMMENT_1' '"' 'COMMENT'
 'COMMENT_1' 's' 'COMMENT'
 'COMMENT_1' '\'' 'COMMENT'
-'COMMENT_1' '\\' 'COMMENT'			; (COMMENT)
+'COMMENT_1' '\\' 'COMMENT'		; (COMMENT)
 'COMMENT_1' '*' 'COMMENT_1'		; COMMENT SEC STAR
 'COMMENT_1' '/' '0'				; END COMMENT
 '0' '=' '*='					; ASSING/EQUALS
@@ -168,17 +168,18 @@
 '0' '?' '*?'					; IF_THEN
 '0' ':' '*:'					; IF_ELSE
 '0' '~' '*~'					; NOT_B
+'0' '^' '*^'					; XOR_B
 '0' '&' '*&'					; AND_B
 '*&' '&' '*&&'					; AND
 '0' '|' '*|'					; OR_B
 '*|' '|' '*||'					; OR
 '0' '(' '*PUNCTUATOR'
-'0' ')' '*PUNCTUATOR'					; PARENTHESES
+'0' ')' '*PUNCTUATOR'			; PARENTHESES
 '0' '[' '*PUNCTUATOR'
-'0' ']' '*PUNCTUATOR'					; BRACKETS
+'0' ']' '*PUNCTUATOR'			; BRACKETS
 '0' '{' '*PUNCTUATOR'
-'0' '}' '*PUNCTUATOR'					; BRACES
-'0' ';' '*PUNCTUATOR'					; END_EXP
-'0' ',' '*PUNCTUATOR'					; SEPARATOR
-'0' '.' '*PUNCTUATOR'					; INTERPUNCT
-'0' '#' '*PUNCTUATOR'					; HASH
+'0' '}' '*PUNCTUATOR'			; BRACES
+'0' ';' '*PUNCTUATOR'			; END_EXP
+'0' ',' '*PUNCTUATOR'			; SEPARATOR
+'0' '.' '*PUNCTUATOR'			; INTERPUNCT
+'0' '#' '*PUNCTUATOR'			; HASH

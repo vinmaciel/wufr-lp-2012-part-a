@@ -17,18 +17,25 @@
 
 int main() {
 	Automaton lexer;
+	Table keywords;
 	char fileName[64];
 	FILE* input;
+	int i;
 
 	// create the automaton
 	input = fopen("Lexer", "r");
 	createAutomaton(input, &lexer);
 
+	// get keyword table
+	input = fopen("Keywords", "r");
+	createTable(input, &keywords);
+	fclose(input);
+
 	// get input file name
 	printf("Enter input file name:\n");
 	fflush(stdout);
 	gets(fileName);
-	consumeFile(lexer, fileName);
+	consumeFile(lexer, keywords, fileName);
 
 	system("PAUSE");
 

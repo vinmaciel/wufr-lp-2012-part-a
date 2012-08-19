@@ -25,4 +25,15 @@ int isAcceptState(int indexState, Table stateTable);
 int isSubMachine(int indexSymbol, Table automataTable);
 void getSubmachineName(int indexMachine, Table symbolTable, char* name);
 
+typedef struct _DynamicTableNode {
+	char* name;
+	struct _DynamicTableNode* next;
+} DynamicTableNode;
+
+typedef DynamicTableNode* DynamicTable;
+
+void createDynamicTable(DynamicTable* table);
+void addToTable(DynamicTable* table, const char* name);
+DynamicTable lookUpForCell(DynamicTable table, const char* name);
+
 #endif /* TABLE_H_ */

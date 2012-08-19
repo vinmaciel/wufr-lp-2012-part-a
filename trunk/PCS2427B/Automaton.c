@@ -255,15 +255,17 @@ int generateToken(FILE* input, Automaton lexer, char* recycled, Token* token) {
 	return -4;
 }
 
-void consumeFile(Automaton lexer, const char* inputFileName) {
+void consumeFile(Automaton lexer, Table keywords, const char* inputFileName) {
+	int i;
 	char recycled = 0;
 	Token token;
-	char fileName[64];
+	DynamicTable symbols, search;
+	char fileName[64], tokenType[32];
 	FILE *input, *output;
 
 	input = fopen(inputFileName, "r");
 	if(input == NULL) {
-		printf("ERROR: input file not found.\n");
+		printf("ERROR: lexical analyzer file not found.\n");
 		fflush(stdout);
 		system("PAUSE");
 		exit(3);
@@ -272,18 +274,33 @@ void consumeFile(Automaton lexer, const char* inputFileName) {
 	strcat(fileName, ".token");
 	output = fopen(fileName, "w");
 	if(output == NULL) {
-		printf("ERROR: cannot create output file.\n");
+		printf("ERROR: cannot create output token file.\n");
 		fflush(stdout);
 		system("PAUSE");
 		exit(5);
 	}
 
 	createToken(&token);
+	createDynamicTable(&symbols);
 
 	while(recycled != EOF) {
 		switch(generateToken(input, lexer, &recycled, &token)) {
 		case 0:
-			fprintf(output, "%s\t%s\n", token->type, token->value);
+			if(!strcmp(token->type, "IDENTIFIER")) {
+				if(findIndex(keywords, token->value) >= 0) {
+					strcpy(tokenType, "KEYWORD_");
+					for(i = 0; token->value[i] != '\0'; i++)
+						tokenType[i+8] = toupper(token->value[i]);
+					tokenType[i+8] = '\0';
+
+					strcpy(token->type, tokenType);
+				}
+				else {
+					addToTable(&symbols, token->value);
+				}
+			}
+
+			fprintf(output, "%17s %s\n", token->type, token->value);
 			fflush(output);
 			break;
 
@@ -321,4 +338,13 @@ void consumeFile(Automaton lexer, const char* inputFileName) {
 
 	fclose(input);
 	fclose(output);
+
+	// create a file to print the symbol table
+	strcpy(fileName, inputFileName);
+	strcat(fileName, ".symbol");
+	output = fopen(fileName, "w");
+
+	for(i = 0, search = symbols; search != NULL; search = search->next, i++){
+		fprintf(output, "%4d: %s\n", i, search->name);fflush(output);
+	}
 }
