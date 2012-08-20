@@ -20,7 +20,6 @@ int main() {
 	Table keywords;
 	char fileName[64];
 	FILE* input;
-	int i;
 
 	// create the automaton
 	input = fopen("Lexer", "r");

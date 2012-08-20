@@ -119,12 +119,13 @@ void createDynamicTable(DynamicTable* table) {
 	*table = NULL;
 }
 
-void addToTable(DynamicTable* table, const char* name) {
+int addToTable(DynamicTable* table, const char* name) {
 	DynamicTable newCell, search;
+	int index;
 
-	search = lookUpForCell(*table, name);
+	index = lookUpForCell(*table, name);
 
-	if(search == NULL) {
+	if(index == -1) {
 		newCell = (DynamicTableNode*) malloc(sizeof(DynamicTableNode));
 
 		newCell->name = (char*) malloc((strlen(name)+1)*sizeof(char));
@@ -132,20 +133,28 @@ void addToTable(DynamicTable* table, const char* name) {
 
 		newCell->next = NULL;
 
-		if(*table == NULL)
+		if(*table == NULL) {
 			*table = newCell;
+			index = 0;
+		}
 		else {
-			for(search = *table; search->next != NULL; search = search->next);
+			for(index = 1, search = *table; search->next != NULL; search = search->next, index++);
 
 			search->next = newCell;
 		}
 	}
+
+	return index;
 }
 
-DynamicTable lookUpForCell(DynamicTable table, const char* name) {
+int lookUpForCell(DynamicTable table, const char* name) {
 	DynamicTable search;
+	int i;
 
-	for(search = table; search != NULL && strcmp(search->name, name); search = search->next);
+	for(i = 0, search = table; search != NULL && strcmp(search->name, name); search = search->next, i++);
 
-	return search;
+	if(search == NULL)
+		return -1;
+	else
+		return i;
 }
