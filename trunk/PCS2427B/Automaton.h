@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include "Table.h"
 #include "StringManager.h"
+#include "Token.h"
 
 typedef struct {
 	Table symbolTable;

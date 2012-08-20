@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include "Table.h"
 #include "Automaton.h"
+#include "Token.h"
 
 void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 	char stateName[NAME_LENGTH], symbol[NAME_LENGTH], nextStateName[NAME_LENGTH];
@@ -256,7 +257,7 @@ int generateToken(FILE* input, Automaton lexer, char* recycled, Token* token) {
 }
 
 void consumeFile(Automaton lexer, Table keywords, const char* inputFileName) {
-	int i;
+	int i, index;
 	char recycled = 0;
 	Token token;
 	DynamicTable symbols, search;
@@ -286,6 +287,8 @@ void consumeFile(Automaton lexer, Table keywords, const char* inputFileName) {
 	while(recycled != EOF) {
 		switch(generateToken(input, lexer, &recycled, &token)) {
 		case 0:
+
+			// IDENTIFIER AND KEYOWRDS
 			if(!strcmp(token->type, "IDENTIFIER")) {
 				if(findIndex(keywords, token->value) >= 0) {
 					strcpy(tokenType, "KEYWORD_");
@@ -296,10 +299,25 @@ void consumeFile(Automaton lexer, Table keywords, const char* inputFileName) {
 					strcpy(token->type, tokenType);
 				}
 				else {
-					addToTable(&symbols, token->value);
+					index = addToTable(&symbols, token->value);
+					integerToString(token->value, index, 10);
 				}
 			}
 
+			// CONSTANT
+			else if(!strcmp(token->type, "CONSTANT")) {
+				if(token->value[0] == '\'') { // characters
+					index = characterToInteger(token->value);
+					integerToString(token->value, index, 2);
+				}
+				else { // integers
+					// TODO: the base value can be modified in future exercises
+					index = stringToInteger(token->value, 10);
+					integerToString(token->value, index, 2);
+				}
+			}
+
+			// DEFAULT
 			fprintf(output, "%17s %s\n", token->type, token->value);
 			fflush(output);
 			break;

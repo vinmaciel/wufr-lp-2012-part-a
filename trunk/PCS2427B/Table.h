@@ -33,7 +33,7 @@ typedef struct _DynamicTableNode {
 typedef DynamicTableNode* DynamicTable;
 
 void createDynamicTable(DynamicTable* table);
-void addToTable(DynamicTable* table, const char* name);
-DynamicTable lookUpForCell(DynamicTable table, const char* name);
+int addToTable(DynamicTable* table, const char* name);
+int lookUpForCell(DynamicTable table, const char* name);
 
 #endif /* TABLE_H_ */

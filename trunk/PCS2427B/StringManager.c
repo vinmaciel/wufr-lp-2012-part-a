@@ -83,11 +83,3 @@ void recycleSymbol(StringManager* manager) {
 char* printString(StringManager manager) {
 	return &(manager->string[manager->index]);
 }
-
-
-void createToken(Token* token) {
-	(*token) = (TokenStruct*) malloc(sizeof(TokenStruct));
-
-	strcpy((*token)->type, "NULL");
-	strcpy((*token)->value, "");
-}
