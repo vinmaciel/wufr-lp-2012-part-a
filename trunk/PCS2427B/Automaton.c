@@ -162,6 +162,7 @@ void createAutomaton(FILE* input, Automaton* automaton) {
 /*
  * Generate a token based on an input file in C language.
  *
+ * @return 1 if end-of-file is reached
  * @return 0 if a valid token is generated
  * @return -1 if symbol undefined at lexer
  * @return -2 if symbol (not comment) larger than 256
@@ -203,6 +204,7 @@ int generateToken(FILE* input, Automaton lexer, char* recycled, Token* token) {
 		else
 			symbol[0] = currentCharacter;
 
+		printf("symbol: %c :: %X\n", symbol[0], symbol[0]);fflush(stdout);
 		*recycled = 0;
 
 		// if not EOF
