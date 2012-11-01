@@ -22,7 +22,7 @@ int main() {
 	FILE* input;
 
 	// create the automaton
-	input = fopen("Lexer", "r");
+	input = fopen("WirthLexer", "r");
 	createAutomaton(input, &lexer);
 
 	// get keyword table
