@@ -1,0 +1,9 @@
+5
+'ini' 'id' 'fin' '*accept' 'oth'
+5
+'DO' 'IDENTIFIER' ',' ';' '<easySyntax>'
+'ini' 'DO' 'id'
+'id' 'IDENTIFIER' 'fin'
+'fin' ',' 'oth'
+'fin' ';' '*accept'
+'oth' '<easySyntax>' '*accept'

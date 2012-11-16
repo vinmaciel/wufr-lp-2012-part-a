@@ -11,23 +11,15 @@
 #include <ctype.h>
 #include "Table.h"
 #include "Machine.h"
+#include "Token.h"
 #include "AutomataList.h"
 #include "AutomataStack.h"
 
-void createMachine(Machine* machine) {
+void createMachine(FILE* input, Machine* machine) {
 	int i;
-	char automatonFileName[64], fileName[64];
+	char automatonFileName[64];
 	Automaton automaton;
-	FILE *automatonFile, *input;
-
-	/* get automaton file */
-	input = NULL;
-	while (input == NULL) {
-		printf("Enter automaton file name:\n");
-		fflush(stdout);
-		gets(fileName);
-		input = fopen(fileName, "r");
-	}
+	FILE *automatonFile;
 
 	/* create free list */
 	newFreeList();
@@ -207,6 +199,210 @@ int testString(Machine machine, StringManager* stringManager) {
 	}
 
 	cleanAutomataStack(&stack);
+
+	return result;
+}
+
+/**
+ * Consumes characters from a file in order to provide a set of tokens that will be used to decide if the
+ * sentences from the file belongs to the language specified.
+ *
+ * @return 1 if accepts, 0 otherwise
+ */
+int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inputFileName) {
+	int i;
+	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
+	int noTransition, result;
+
+	int index;
+	char recycled;
+	Automaton currentAutomaton;
+	AutomataStack stack;
+	Token token, recycledToken;
+	DynamicTable symbols, search;
+	char fileName[64];
+	FILE *input, *tokenized, *compiled, *symbol;
+
+	/* open input file */
+	input = fopen(inputFileName, "r");
+	if(input == NULL) {
+		printf("ERROR: input file not found.\n");
+		fflush(stdout);
+		system("PAUSE");
+		exit(3);
+	}
+
+	/* create token file */
+	strcpy(fileName, inputFileName);
+	strcat(fileName, ".token");
+	tokenized = fopen(fileName, "w");
+	if(tokenized == NULL) {
+		printf("ERROR: cannot create output token file.\n");
+		fflush(stdout);
+		system("PAUSE");
+		exit(5);
+	}
+
+	/* create compiled file */
+	strcpy(fileName, inputFileName);
+	strcat(fileName, ".out");
+	compiled = fopen(fileName, "w");
+	if(compiled == NULL) {
+		printf("ERROR: cannot create output file.\n");
+		fflush(stdout);
+		system("PAUSE");
+		exit(5);
+	}
+
+	/* get an empty stack */
+	newAutomataStack(&stack);
+
+	/* create token and symbol table */
+	createToken(&token);
+	createToken(&recycledToken);
+	createDynamicTable(&symbols);
+
+	noTransition = 0;
+	recycled = 0;
+	strcpy(recycledToken->type, "NULL");
+
+	/* get the initial automaton */
+	currentAutomatonIndex = 0;
+	currentAutomaton = getAutomatonByIndex(parser->automataList, currentAutomatonIndex);
+	if(currentAutomaton == NULL) {
+		printf("ERROR: Searching for non-existing automaton.\n");
+		fflush(stdout);
+		exit(4);
+	}
+
+	for(nextStateIndex = 0; recycled != EOF && !noTransition && nextStateIndex >= 0; i++) {
+		currentStateIndex = nextStateIndex;
+
+		printf("state: %d\n", currentStateIndex);fflush(stdout);
+		/* get token */
+		if(!strcmp(recycledToken->type, "NULL")) { /* if not recycled */
+			printf("new token\n");fflush(stdout);
+			switch(generateToken(input, lexer, &recycled, &token)) {
+			case 1:
+				break;
+
+			case -1:
+				fprintf(tokenized, "<ERROR: Symbol \"%c\" (%x) undefined>\n", recycled, recycled); fflush(tokenized);
+				printf("ERROR: Symbol \"%c\" undefined for the lexical analyzer.\n", recycled); fflush(stdout);
+				system("PAUSE");
+				exit(2);
+				break;
+
+			case -2:
+				fprintf(tokenized, "<ERROR: Symbol \"%s\" larger than 256>\n", token->value); fflush(tokenized);
+				printf("ERROR: Symbol \"%s\" larger than 256.\n", token->value); fflush(stdout);
+				system("PAUSE");
+				exit(2);
+				break;
+
+			case -3:
+				fprintf(tokenized, "<ERROR: Token \"%s\" undefined>\n", token->value); fflush(tokenized);
+				printf("ERROR: Token \"%s\" undefined for the lexical analyzer.\n", token->value); fflush(stdout);
+				system("PAUSE");
+				exit(2);
+				break;
+
+			case -4:
+				printf("ERROR: unknown.\n"); fflush(stdout);
+				system("PAUSE");
+				exit(3);
+				break;
+			}
+			verifyKeyword(keywords, &token);
+
+			if(!strcmp(token->type, "IDENTIFIER")) {
+				index = addToTable(&symbols, token->value);
+				printf("symbol index: %d\n", index);fflush(stdout);
+				integerToString(token->value, index, 10);
+			}
+			symbolIndex = findIndex(currentAutomaton->symbolTable, token->type);
+		}
+		else {
+			printf("recycled token\n");fflush(stdout);
+			strcpy(token->type, recycledToken->type);
+			strcpy(token->value, recycledToken->value);
+		}
+		strcpy(recycledToken->type, "NULL");
+
+		if(recycled != EOF) {
+
+			printf("token: %s %s\n", token->type, token->value);fflush(stdout);
+
+			if(recycled != EOF) {
+				printf("not EOF\n");fflush(stdout);
+				/* do the production */
+				if(symbolIndex >= 0) {
+					printf("produce\n");fflush(stdout);
+					nextStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
+				}
+
+				/*
+				 * if the symbol doesn't belong to the machine OR
+				 * the production redirects to a rejection state
+				 * => verify if there is a submachine call in this state
+				 */
+				if(symbolIndex < 0 || nextStateIndex < 0) {
+					/* enter the submachine */
+					if(currentAutomaton->submachine[0][currentStateIndex] >= 0) {
+						printf("enter submachine\n");fflush(stdout);
+						pushAutomaton(&stack, currentAutomatonIndex, currentAutomaton->submachine[1][currentStateIndex]);
+
+						currentAutomatonIndex = currentAutomaton->submachine[0][currentStateIndex];
+						currentAutomaton = getAutomatonByIndex(parser->automataList, currentAutomatonIndex);
+						nextStateIndex = 0;
+					}
+					/* verify if there is a stacked submachine */
+					else {
+						printf("leave submachine\n");fflush(stdout);
+						if(!isEmptyStack(stack) && isAcceptState(currentStateIndex, currentAutomaton->stateTable)) {
+							popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
+							currentAutomaton = getAutomatonByIndex(parser->automataList, currentAutomatonIndex);
+						}
+						else
+							noTransition = 1;
+					}
+
+					printf("recycled?\n");fflush(stdout);
+					copyToken(&recycledToken, token);
+				}
+				else {
+					fprintf(tokenized, "%17s %s\n", token->type, token->value);
+					fflush(tokenized);
+				}
+			}
+		}
+	}
+
+	printf("pop\n");fflush(stdout);
+	/* try to pop all automata */
+	while(!isEmptyStack(stack) && nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable)) {
+		printf("iterate\n");fflush(stdout);
+		popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
+		currentAutomaton = getAutomatonByIndex(parser->automataList, currentAutomatonIndex);
+	}
+
+	printf("end\n");fflush(stdout);
+	/* accept (or do not) the string */
+	if(recycled == EOF && nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack))
+		result = 1;
+	else
+		result = 0;
+
+	cleanAutomataStack(&stack);
+
+	// create a file to print the symbol table
+	strcpy(fileName, inputFileName);
+	strcat(fileName, ".symbol");
+	symbol = fopen(fileName, "w");
+
+	for(i = 0, search = symbols; search != NULL; search = search->next, i++){
+		fprintf(symbol, "%4d: %s\n", i, search->name);fflush(symbol);
+	}
 
 	return result;
 }

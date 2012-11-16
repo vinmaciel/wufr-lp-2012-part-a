@@ -18,7 +18,8 @@ typedef struct {
 
 typedef MachineStruct* Machine;
 
-void createMachine(Machine* machine);
+void createMachine(FILE* input, Machine* machine);
 int testString(Machine machine, StringManager* stringManager);
+int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inputFileName);
 
 #endif /* MACHINE_H_ */

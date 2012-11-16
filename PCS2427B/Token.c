@@ -83,9 +83,19 @@ int stringToInteger(const char* number, int base) {
 	return integer;
 }
 
+void copyToken(Token *dest, Token source) {
+	strcpy((*dest)->type, source->type);
+	strcpy((*dest)->value, source->value);
+}
+
 char* integerToString(char* string, int value, int base) {
 	char number[128];
 	int i;
+
+	if(!value) {
+		strcpy(string, "0");
+		return string;
+	}
 
 	for(i = 0; value; i++) {
 		if(value%base < 10)
@@ -102,4 +112,33 @@ char* integerToString(char* string, int value, int base) {
 	string[i] = '\0';
 
 	return string;
+}
+
+void verifyKeyword(Table keywords, Token* token) {
+	char tokenType[32];
+	int i, index;
+
+	// IDENTIFIER AND KEYOWRDS
+	if(!strcmp((*token)->type, "IDENTIFIER")) {
+		if(findIndex(keywords, (*token)->value) >= 0) {
+			for(i = 0; (*token)->value[i] != '\0'; i++)
+				tokenType[i] = toupper((*token)->value[i]);
+			tokenType[i] = '\0';
+
+			strcpy((*token)->type, tokenType);
+		}
+	}
+
+	// CONSTANT
+	else if(!strcmp((*token)->type, "CONSTANT")) {
+		if((*token)->value[0] == '\'') { // characters
+			index = characterToInteger((*token)->value);
+			integerToString((*token)->value, index, 2);
+		}
+		else { // integers
+			// TODO: the base value can be modified in future exercises
+			index = stringToInteger((*token)->value, 10);
+			integerToString((*token)->value, index, 2);
+		}
+	}
 }

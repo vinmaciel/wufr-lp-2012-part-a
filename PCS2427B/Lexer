@@ -1,5 +1,5 @@
-38
-'0' '*IDENTIFIER' 'KEYWORD' '*CONSTANT' '*+' '*-' '**' '*/' '*%' '*++' '*--' '*=' '*==' '*<' '*<<' '*<=' '*>' '*>>' '*>=' '*!' '*!=' '*?' '*:' '*~' '*^' '*&' '*&&' '*|' '*||' '*PUNCTUATOR' 'CHAR_0' 'CHAR' 'CHAR_CNTRL' 'STRING_0' 'STRING_1' '*STRING' 'COMMENT' 'COMMENT_1'
+47
+'0' '*IDENTIFIER' 'KEYWORD' '*CONSTANT' '*+' '*-' '**' '*/' '*%' '*++' '*--' '*=' '*==' '*<' '*<<' '*<=' '*>' '*>>' '*>=' '*!' '*!=' '*?' '*:' '*~' '*^' '*&' '*&&' '*|' '*||' '*(' '*)' '*[' '*]' '*{' '*}' '*;' '*.' '*,' '*#' 'CHAR_0' 'CHAR' 'CHAR_CNTRL' 'STRING_0' 'STRING_1' '*STRING' 'COMMENT' 'COMMENT_1'
 33
 ' ' 'a' '_' 'n' '+' '-' '*' '/' '%' '=' '<' '>' '!' '?' ':' '~' '^' '&' '|' '(' ')' '[' ']' '{' '}' ';' ',' '.' '#' '"' 's' '\'' '\\'
 '0' ' ' '0'						; WHITESPACES
@@ -173,13 +173,13 @@
 '*&' '&' '*&&'					; AND
 '0' '|' '*|'					; OR_B
 '*|' '|' '*||'					; OR
-'0' '(' '*PUNCTUATOR'
-'0' ')' '*PUNCTUATOR'			; PARENTHESES
-'0' '[' '*PUNCTUATOR'
-'0' ']' '*PUNCTUATOR'			; BRACKETS
-'0' '{' '*PUNCTUATOR'
-'0' '}' '*PUNCTUATOR'			; BRACES
-'0' ';' '*PUNCTUATOR'			; END_EXP
-'0' ',' '*PUNCTUATOR'			; SEPARATOR
-'0' '.' '*PUNCTUATOR'			; INTERPUNCT
-'0' '#' '*PUNCTUATOR'			; HASH
+'0' '(' '*('
+'0' ')' '*)'					; PARENTHESES
+'0' '[' '*['
+'0' ']' '*]'					; BRACKETS
+'0' '{' '*{'
+'0' '}' '*}'					; BRACES
+'0' ';' '*;'					; END_EXP
+'0' ',' '*,'					; SEPARATOR
+'0' '.' '*.'					; INTERPUNCT
+'0' '#' '*#'					; HASH
