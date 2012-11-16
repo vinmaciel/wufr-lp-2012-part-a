@@ -17,13 +17,31 @@
 
 int main() {
 	Automaton lexer;
+	Machine parser;
 	Table keywords;
 	char fileName[64];
 	FILE* input;
+	int accept;
 
-	// create the automaton
-	input = fopen("WirthLexer", "r");
+	// create lexical analyzer
+	input = fopen("Lexer", "r");
+	if(input == NULL) {
+		printf("ERROR: file \"Lexer\" not found.\n");
+		fflush(stdout);
+		system("PAUSE");
+		exit(3);
+	}
 	createAutomaton(input, &lexer);
+
+	// create syntax analyzer
+	input = fopen("Syntax", "r");
+	if(input == NULL) {
+		printf("ERROR: file \"Syntax\" not found.\n");
+		fflush(stdout);
+		system("PAUSE");
+		exit(3);
+	}
+	createMachine(input, &parser);
 
 	// get keyword table
 	input = fopen("Keywords", "r");
@@ -34,7 +52,13 @@ int main() {
 	printf("Enter input file name:\n");
 	fflush(stdout);
 	gets(fileName);
-	consumeFile(lexer, keywords, fileName);
+
+	accept = consumeFile(lexer, parser, keywords, fileName);
+	if(accept)
+		printf("File accepted!\n");
+	else
+		printf("File not accepted!\n");
+	fflush(stdout);
 
 	system("PAUSE");
 

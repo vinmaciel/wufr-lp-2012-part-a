@@ -8,6 +8,8 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
+#include "Table.h"
+
 /*** TOKEN ***
  * NULL
  * IDENTIFIER
@@ -29,5 +31,7 @@ void createToken(Token* token);
 int stringToInteger(const char* number, int base);
 char* integerToString(char* string, int value, int base);
 int characterToInteger(const char* character);
+void copyToken(Token *dest, Token source);
+void verifyKeyword(Table keywords, Token* token);
 
 #endif /* TOKEN_H_ */
