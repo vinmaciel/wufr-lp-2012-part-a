@@ -35,7 +35,7 @@ int getSemanticFunctionIndex(const char* label) {
 		return 3;
 	if(!strcmp(label, "setJump"))
 		return 4;
-	if(!strcmp(label, ""))
+	if(!strcmp(label, "endFile"))
 		return 5;
 
 	return -1;
@@ -60,6 +60,8 @@ semantic semanticFunction(int index) {
 		return endBlock;
 	case 4:
 		return setJump;
+	case 5:
+		return endFile;
 	}
 	return nil;
 }
@@ -92,6 +94,21 @@ void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 		exit(5);
 	}
 }
+// 5
+void endFile(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	i = lookForUndefined(*symbols);
+
+	if(i >= 0) {
+		printf("ERROR: label \"%s\" used but not defined.\n", getRow(*symbols, i)->name);
+		fprintf(file, "ERROR: label \"%s\" used but not defined.\n", getRow(*symbols, i)->name);
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
+	}
+}
 /******** LIBRARY ********/
 
 /******** VARIABLE ********/
@@ -101,27 +118,39 @@ void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 /******** LABEL ********/
 // 2
 void setLabel(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
 	printf("semantic: label\n");fflush(stdout);
 	// if instruction already has a label, jump to the last assigned label
 	if(strcmp(label,"")) {
-		addToTable(symbols, identifier);
+		i = addToTable(symbols, identifier, "label");
+		defineRow(symbols, i);
 		fprintf(file, "%s\tJP\t%s\n", identifier, label);
 		fflush(file);
 	}
 	// otherwise, add it to symbol table and activate it as current label
 	else {
-		if(lookUpForCell(*symbols, identifier) == -1) {
+		i = lookUpForCell(*symbols, identifier, "label");
+		if(i == -1) {
 			strcpy(label, identifier);
 			strcpy(identifier, "");
-			addToTable(symbols, label);
+			i = addToTable(symbols, label, "label");
+			defineRow(symbols, i);
 		}
 		else {
-			printf("ERROR: duplicate label %s.\n", identifier);
-			fprintf(file, "ERROR: duplicate label %s.\n", identifier);
-			fflush(stdout);
-			fflush(file);
-			system("PAUSE");
-			exit(5);
+			if(!getRow(*symbols, i)->defined) {
+				strcpy(label, identifier);
+				strcpy(identifier, "");
+				defineRow(symbols, i);
+			}
+			else {
+				printf("ERROR: duplicate label %s.\n", identifier);
+				fprintf(file, "ERROR: duplicate label %s.\n", identifier);
+				fflush(stdout);
+				fflush(file);
+				system("PAUSE");
+				exit(5);
+			}
 		}
 	}
 }
@@ -130,19 +159,16 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token) {
 // 4
 void setJump(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: jump\n");fflush(stdout);
-	if(lookUpForCell(*symbols, identifier) >= 0) {
+	if(lookUpForCell(*symbols, identifier, "label") >= 0) {
 		fprintf(file, "%s\tJP\t%s\n", label, identifier);
 		fflush(file);
-		strcpy(label, "");
 	}
 	else {
-		printf("ERROR: label \"%s\" but not defined.\n", identifier);
-		fprintf(file, "ERROR: label \"%s\" but not defined.\n", identifier);
-		fflush(stdout);
+		addToTable(symbols, identifier, "label");
+		fprintf(file, "%s\tJP\t%s\n", label, identifier);
 		fflush(file);
-		system("PAUSE");
-		exit(5);
 	}
+	strcpy(label, "");
 }
 /******** CONDITIONAL ********/
 

@@ -120,24 +120,28 @@ void createDynamicTable(DynamicTable* table) {
 }
 
 /**
- * Insert an new item on the table.
+ * Insert an new item on the table. It is considered undefined by default.
  *
  * @param table to be inserted into.
  * @param name to be inserted.
+ * @param class of the row.
  *
  * @return the index of the added row, or the index of the existing row (if it already exists).
  */
-int addToTable(DynamicTable* table, const char* name) {
+int addToTable(DynamicTable* table, const char* name, const char* class) {
 	DynamicTable newCell, search;
 	int index;
 
-	index = lookUpForCell(*table, name);
+	index = lookUpForCell(*table, name, class);
 
 	if(index == -1) {
 		newCell = (DynamicTableNode*) malloc(sizeof(DynamicTableNode));
 
 		newCell->name = (char*) malloc((strlen(name)+1)*sizeof(char));
+		newCell->class = (char*) malloc((strlen(class)+1)*sizeof(char));
+		newCell->defined = 0;
 		strcpy(newCell->name, name);
+		strcpy(newCell->class, class);
 
 		newCell->next = NULL;
 
@@ -156,21 +160,79 @@ int addToTable(DynamicTable* table, const char* name) {
 }
 
 /**
+ * Make an entry of the table to be considered defined.
+ *
+ * @param table to look for.
+ * @param index of the row.
+ */
+void defineRow(DynamicTable* table, int index) {
+	DynamicTable search;
+	int i;
+
+	for(i = 0, search = *table; search != NULL && i < index; search = search->next, i++);
+
+	if(search != NULL)
+		search->defined = 1;
+}
+
+/**
  * Looks for the existence of specified name entry in the Dynamic Table.
  *
  * @param table to look into.
  * @param name content in the row of the table.
+ * @param class content of the row. It can be "" for any entry.
  *
  * @return the index of the item in the table, -1 if not found.
  */
-int lookUpForCell(DynamicTable table, const char* name) {
+int lookUpForCell(DynamicTable table, const char* name, const char* class) {
 	DynamicTable search;
 	int i;
 
-	for(i = 0, search = table; search != NULL && strcmp(search->name, name); search = search->next, i++);
+	for(i = 0, search = table; search != NULL; search = search->next, i++) {
+		if(!strcmp(search->name, name)) {
+			if(!strcmp(class, "")) break;
+			else if(!strcmp(search->class, class)) break;
+		}
+	}
 
 	if(search == NULL)
 		return -1;
 	else
 		return i;
+}
+
+/**
+ * Searches for the first occurrence of a undefined entry in the table.
+ *
+ * @param table to look into.
+ *
+ * @return the index of the first undefined entry, -1 if all defined.
+ */
+int lookForUndefined(DynamicTable table) {
+	DynamicTable search;
+	int i;
+
+	for(i = 0, search = table; search != NULL && search->defined; search = search->next, i++);
+
+	if(search == NULL)
+		return -1;
+	else
+		return i;
+}
+
+/**
+ * Retrieves the name content of the row represented by its index.
+ *
+ * @param table to look into.
+ * @param index of the row.
+ *
+ * @return the name in the row.
+ */
+DynamicTable getRow(DynamicTable table, int index) {
+	DynamicTable search;
+	int i;
+
+	for(i = 0, search = table; search != NULL && i < index; i++, search = search->next);
+
+	return search;
 }
