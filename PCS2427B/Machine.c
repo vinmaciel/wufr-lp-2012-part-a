@@ -413,7 +413,7 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	symbol = fopen(fileName, "w");
 
 	for(i = 0, search = symbols; search != NULL; search = search->next, i++){
-		fprintf(symbol, "%4d: %s\n", i, search->name);fflush(symbol);
+		fprintf(symbol, "%4d-%d: %10s %10s\n", i, search->defined, search->name, search->class);fflush(symbol);
 	}
 
 	return result;

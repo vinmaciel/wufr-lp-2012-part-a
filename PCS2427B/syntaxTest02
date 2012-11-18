@@ -20,5 +20,10 @@ procedure bool procedure0(int param1, bool param2) {
 	label2:
 	label3:
 	label5:
+	goto label6;
 	goto label2;
+	label6:
+	goto label3;
 }
+
+end

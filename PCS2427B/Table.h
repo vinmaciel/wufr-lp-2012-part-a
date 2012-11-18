@@ -27,13 +27,18 @@ void getSubmachineName(int indexMachine, Table symbolTable, char* name);
 
 typedef struct _DynamicTableNode {
 	char* name;
+	char* class;
+	int defined;
 	struct _DynamicTableNode* next;
 } DynamicTableNode;
 
 typedef DynamicTableNode* DynamicTable;
 
 void createDynamicTable(DynamicTable* table);
-int addToTable(DynamicTable* table, const char* name);
-int lookUpForCell(DynamicTable table, const char* name);
+int addToTable(DynamicTable* table, const char* name, const char* class);
+void defineRow(DynamicTable* table, int index);
+int lookUpForCell(DynamicTable table, const char* name, const char* class);
+int lookForUndefined(DynamicTable table);
+DynamicTable getRow(DynamicTable table, int index);
 
 #endif /* TABLE_H_ */

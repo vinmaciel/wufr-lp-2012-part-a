@@ -20,6 +20,7 @@ void cleanSemanticParameters();
 void nil(FILE* file, DynamicTable* symbols, Token token);
 void setIdentifier(FILE* file, DynamicTable* symbols, Token token);
 void endBlock(FILE* file, DynamicTable* symbols, Token token);
+void endFile(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LIBRARY ********/
 

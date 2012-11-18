@@ -15,3 +15,13 @@
 
 '*inicial'		'IDENTIFIER'	'id0'			'setIdentifier'
 'id0'			':'				'*inicial'		'setLabel'
+'id0'			'='				'id1'			'nil'
+'id1'			'IDENTIFIER'	'id2'			'nil'
+'id1'			'CONSTANT'		'id2'			'nil'
+'id2'			'+'				'id3'			'nil'
+'id2'			'-'				'id3'			'nil'
+'id2'			'*'				'id3'			'nil'
+'id2'			'/'				'id3'			'nil'
+'id3'			'IDENTIFIER'	'id4'			'nil'
+'id3'			'CONSTANT'		'id4'			'nil'
+'id4'			';'				'*inicial'		'nil'
