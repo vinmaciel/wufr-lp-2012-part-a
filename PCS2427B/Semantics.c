@@ -14,6 +14,7 @@
 /******** PRIVATE PARAMETERS ********/
 char identifier[64];
 char label[64];
+char type[5];
 /************************************/
 
 /**
@@ -37,6 +38,10 @@ int getSemanticFunctionIndex(const char* label) {
 		return 4;
 	if(!strcmp(label, "endFile"))
 		return 5;
+	if(!strcmp(label, "setType"))
+		return 6;
+	if(!strcmp(label, "setVar"))
+		return 7;
 
 	return -1;
 }
@@ -62,6 +67,10 @@ semantic semanticFunction(int index) {
 		return setJump;
 	case 5:
 		return endFile;
+	case 6:
+		return setType;
+	case 7:
+		return setVar;
 	}
 	return nil;
 }
@@ -81,6 +90,11 @@ void setIdentifier(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: id\n");fflush(stdout);
 	strcpy(identifier, token->value);
 }
+// 6
+void setType(FILE* file, DynamicTable* symbols, Token token) {
+	printf("semantic: type\n");fflush(stdout);
+	strcpy(type, token->value);
+}
 // 3
 void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: EOB\n");fflush(stdout);
@@ -96,10 +110,12 @@ void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 }
 // 5
 void endFile(FILE* file, DynamicTable* symbols, Token token) {
+	DynamicTable search;
 	int i;
 
 	i = lookForUndefined(*symbols);
 
+	// cannot accept file with undefined labels
 	if(i >= 0) {
 		printf("ERROR: label \"%s\" used but not defined.\n", getRow(*symbols, i)->name);
 		fprintf(file, "ERROR: label \"%s\" used but not defined.\n", getRow(*symbols, i)->name);
@@ -108,11 +124,40 @@ void endFile(FILE* file, DynamicTable* symbols, Token token) {
 		system("PAUSE");
 		exit(5);
 	}
+
+	// the end of the file must contain the data allocation
+	for(search = *symbols; search != NULL; search = search->next) {
+		if(!strcmp(search->class, "int") || !strcmp(search->class, "bool")) {
+			fprintf(file, "%s\t K\t0000\n", search->name);
+			fflush(file);
+		}
+	}
 }
 /******** LIBRARY ********/
 
 /******** VARIABLE ********/
+// 7
+void setVar(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
 
+	printf("semantic: var\n");fflush(stdout);
+	i = lookUpForCell(*symbols, identifier, "variable");
+
+	if(i == -1) {
+		i = addToTable(symbols, identifier, type);
+		defineRow(symbols, i);
+		strcpy(identifier, "");
+		strcpy(type, "");
+	}
+	else {
+		printf("ERROR: redeclaration of \"%s\".\n", identifier);
+		fprintf(file, "ERROR: redeclaration of \"%s\".\n", identifier);
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
+	}
+}
 /******** PROCEDURE ********/
 
 /******** LABEL ********/
