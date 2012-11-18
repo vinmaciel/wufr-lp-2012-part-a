@@ -34,7 +34,11 @@ void createMachine(FILE* input, Machine* machine) {
 		automatonFile = NULL;
 		automatonFileName[0] = '\0';
 
+		automaton = NULL;
+
 		strcpy(automatonFileName, (*machine)->automataTable.elem[i]);
+
+		printf("filename: %s\n", automatonFileName);fflush(stdout);
 
 		automatonFile = fopen(automatonFileName, "r");
 
@@ -126,7 +130,7 @@ int testString(Machine machine, StringManager* stringManager) {
 		if(symbol[0]) {
 			/* do the production */
 			if(symbolIndex >= 0)
-				nextStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
+				nextStateIndex = currentAutomaton->production[0][currentStateIndex][symbolIndex];
 
 			/*
 			 * if the symbol doesn't belong to the machine OR
@@ -278,7 +282,7 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	for(nextStateIndex = 0; recycled != EOF && !noTransition && nextStateIndex >= 0; i++) {
 		currentStateIndex = nextStateIndex;
 
-		printf("state: %d\n", currentStateIndex);fflush(stdout);
+		printf("machine: %d :: state: %d\n", currentAutomatonIndex, currentStateIndex);fflush(stdout);
 		/* get token */
 		if(!strcmp(recycledToken->type, "NULL")) { /* if not recycled */
 			printf("new token\n");fflush(stdout);
@@ -320,7 +324,6 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 				printf("symbol index: %d\n", index);fflush(stdout);
 				integerToString(token->value, index, 10);
 			}
-			symbolIndex = findIndex(currentAutomaton->symbolTable, token->type);
 		}
 		else {
 			printf("recycled token\n");fflush(stdout);
@@ -328,6 +331,8 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 			strcpy(token->value, recycledToken->value);
 		}
 		strcpy(recycledToken->type, "NULL");
+
+		symbolIndex = findIndex(currentAutomaton->symbolTable, token->type);
 
 		if(recycled != EOF) {
 
@@ -337,8 +342,8 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 				printf("not EOF\n");fflush(stdout);
 				/* do the production */
 				if(symbolIndex >= 0) {
-					printf("produce\n");fflush(stdout);
-					nextStateIndex = currentAutomaton->production[currentStateIndex][symbolIndex];
+					nextStateIndex = currentAutomaton->production[0][currentStateIndex][symbolIndex];
+					printf("produce: %2d %2d => %2d\n", currentStateIndex, symbolIndex, nextStateIndex);fflush(stdout);
 				}
 
 				/*
@@ -349,22 +354,27 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 				if(symbolIndex < 0 || nextStateIndex < 0) {
 					/* enter the submachine */
 					if(currentAutomaton->submachine[0][currentStateIndex] >= 0) {
-						printf("enter submachine\n");fflush(stdout);
+						printf("enter submachine => ");fflush(stdout);
 						pushAutomaton(&stack, currentAutomatonIndex, currentAutomaton->submachine[1][currentStateIndex]);
 
 						currentAutomatonIndex = currentAutomaton->submachine[0][currentStateIndex];
+						printf("%d\n", currentAutomatonIndex);fflush(stdout);
 						currentAutomaton = getAutomatonByIndex(parser->automataList, currentAutomatonIndex);
+
 						nextStateIndex = 0;
 					}
 					/* verify if there is a stacked submachine */
 					else {
-						printf("leave submachine\n");fflush(stdout);
 						if(!isEmptyStack(stack) && isAcceptState(currentStateIndex, currentAutomaton->stateTable)) {
+							printf("leave submachine => ");fflush(stdout);
 							popAutomaton(&stack, &currentAutomatonIndex, &nextStateIndex);
+							printf("%d\n", currentAutomatonIndex);fflush(stdout);
 							currentAutomaton = getAutomatonByIndex(parser->automataList, currentAutomatonIndex);
 						}
-						else
+						else {
+							printf("no transition\n");fflush(stdout);
 							noTransition = 1;
+						}
 					}
 
 					printf("recycled?\n");fflush(stdout);

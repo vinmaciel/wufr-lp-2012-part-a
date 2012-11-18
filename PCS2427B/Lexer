@@ -2,184 +2,184 @@
 '0' '*IDENTIFIER' 'KEYWORD' '*CONSTANT' '*+' '*-' '**' '*/' '*%' '*++' '*--' '*=' '*==' '*<' '*<<' '*<=' '*>' '*>>' '*>=' '*!' '*!=' '*?' '*:' '*~' '*^' '*&' '*&&' '*|' '*||' '*(' '*)' '*[' '*]' '*{' '*}' '*;' '*.' '*,' '*#' 'CHAR_0' 'CHAR' 'CHAR_CNTRL' 'STRING_0' 'STRING_1' '*STRING' 'COMMENT' 'COMMENT_1'
 33
 ' ' 'a' '_' 'n' '+' '-' '*' '/' '%' '=' '<' '>' '!' '?' ':' '~' '^' '&' '|' '(' ')' '[' ']' '{' '}' ';' ',' '.' '#' '"' 's' '\'' '\\'
-'0' ' ' '0'						; WHITESPACES
-'0' 'a' '*IDENTIFIER'
-'0' '_' '*IDENTIFIER'
-'*IDENTIFIER' 'a' '*IDENTIFIER'
-'*IDENTIFIER' '_' '*IDENTIFIER'
-'*IDENTIFIER' 'n' '*IDENTIFIER'	; IDENTIFIERS
-'0' '\'' 'CHAR_0'
-'CHAR_0' ' ' 'CHAR'
-'CHAR_0' 'a' 'CHAR'
-'CHAR_0' 'n' 'CHAR'
-'CHAR_0' '+' 'CHAR'
-'CHAR_0' '-' 'CHAR'
-'CHAR_0' '*' 'CHAR'
-'CHAR_0' '/' 'CHAR'
-'CHAR_0' '%' 'CHAR'
-'CHAR_0' '=' 'CHAR'
-'CHAR_0' '<' 'CHAR'
-'CHAR_0' '>' 'CHAR'
-'CHAR_0' '!' 'CHAR'
-'CHAR_0' '?' 'CHAR'
-'CHAR_0' ':' 'CHAR'
-'CHAR_0' '~' 'CHAR'
-'CHAR_0' '&' 'CHAR'
-'CHAR_0' '|' 'CHAR'
-'CHAR_0' '(' 'CHAR'
-'CHAR_0' ')' 'CHAR'
-'CHAR_0' '[' 'CHAR'
-'CHAR_0' ']' 'CHAR'
-'CHAR_0' '{' 'CHAR'
-'CHAR_0' '}' 'CHAR'
-'CHAR_0' ';' 'CHAR'
-'CHAR_0' ',' 'CHAR'
-'CHAR_0' '.' 'CHAR'
-'CHAR_0' '#' 'CHAR'
-'CHAR_0' '"' 'CHAR'
-'CHAR_0' 's' 'CHAR'
-'CHAR_0' '\\' 'CHAR_CNTRL'
-'CHAR_CNTRL' 'a' 'CHAR'
-'CHAR_CNTRL' 'n' 'CHAR'
-'CHAR_CNTRL' '\'' 'CHAR'
-'CHAR_CNTRL' '\\' 'CHAR'
-'CHAR' '\'' '*CONSTANT'
-'0' 'n' '*CONSTANT'
-'*CONSTANT' 'n' '*CONSTANT'		; CONSTANTS
-'0' '"' 'STRING_0'
-'STRING_0' ' ' 'STRING_0'
-'STRING_0' 'a' 'STRING_0'
-'STRING_0' 'n' 'STRING_0'
-'STRING_0' '+' 'STRING_0'
-'STRING_0' '-' 'STRING_0'
-'STRING_0' '*' 'STRING_0'
-'STRING_0' '/' 'STRING_0'
-'STRING_0' '%' 'STRING_0'
-'STRING_0' '=' 'STRING_0'
-'STRING_0' '<' 'STRING_0'
-'STRING_0' '>' 'STRING_0'
-'STRING_0' '!' 'STRING_0'
-'STRING_0' '?' 'STRING_0'
-'STRING_0' ':' 'STRING_0'
-'STRING_0' '~' 'STRING_0'
-'STRING_0' '&' 'STRING_0'
-'STRING_0' '|' 'STRING_0'
-'STRING_0' '(' 'STRING_0'
-'STRING_0' ')' 'STRING_0'
-'STRING_0' '[' 'STRING_0'
-'STRING_0' ']' 'STRING_0'
-'STRING_0' '{' 'STRING_0'
-'STRING_0' '}' 'STRING_0'
-'STRING_0' ';' 'STRING_0'
-'STRING_0' ',' 'STRING_0'
-'STRING_0' '.' 'STRING_0'
-'STRING_0' '#' 'STRING_0'
-'STRING_0' 's' 'STRING_0'
-'STRING_0' '\'' 'STRING_0'
-'STRING_0' '\\' 'STRING_1'
-'STRING_1' 'n' 'STRING_0'
-'STRING_1' 'a' 'STRING_0'
-'STRING_1' '"' 'STRING_0'
-'STRING_1' '\'' 'STRING_0'
-'STRING_1' '\\' 'STRING_0'
-'STRING_0' '"' '*STRING'		; STRING_LITERAL
-'0' '+' '*+'					; ADD/INC
-'*+' '+' '*++'					; INC
-'0' '-' '*-'					; SUB/DEC
-'*-' '-' '*--'					; DEC
-'0' '*' '**'					; MULT
-'0' '%' '*%'					; MODULE
-'0' '/' '*/'					; DIVISION/COMMENT
-'*/' '*' 'COMMENT'				; INIT COMMENT
-'COMMENT' ' ' 'COMMENT'
-'COMMENT' 'a' 'COMMENT'
-'COMMENT' '_' 'COMMENT'
-'COMMENT' 'n' 'COMMENT'
-'COMMENT' '+' 'COMMENT'
-'COMMENT' '-' 'COMMENT'
-'COMMENT' '/' 'COMMENT'
-'COMMENT' '%' 'COMMENT'
-'COMMENT' '=' 'COMMENT'
-'COMMENT' '<' 'COMMENT'
-'COMMENT' '>' 'COMMENT'
-'COMMENT' '!' 'COMMENT'
-'COMMENT' '?' 'COMMENT'
-'COMMENT' ':' 'COMMENT'
-'COMMENT' '~' 'COMMENT'
-'COMMENT' '&' 'COMMENT'
-'COMMENT' '|' 'COMMENT'
-'COMMENT' '(' 'COMMENT'
-'COMMENT' ')' 'COMMENT'
-'COMMENT' '[' 'COMMENT'
-'COMMENT' ']' 'COMMENT'
-'COMMENT' '{' 'COMMENT'
-'COMMENT' '}' 'COMMENT'
-'COMMENT' ';' 'COMMENT'
-'COMMENT' ',' 'COMMENT'
-'COMMENT' '.' 'COMMENT'
-'COMMENT' '#' 'COMMENT'
-'COMMENT' '"' 'COMMENT'	
-'COMMENT' 's' 'COMMENT'
-'COMMENT' '\'' 'COMMENT'
-'COMMENT' '\\' 'COMMENT'		; (COMMENT)
-'COMMENT' '*' 'COMMENT_1'		; COMMENT SEC STAR
-'COMMENT_1' ' ' 'COMMENT'
-'COMMENT_1' 'a' 'COMMENT'
-'COMMENT_1' '_' 'COMMENT'
-'COMMENT_1' 'n' 'COMMENT'
-'COMMENT_1' '+' 'COMMENT'
-'COMMENT_1' '-' 'COMMENT'
-'COMMENT_1' '%' 'COMMENT'
-'COMMENT_1' '=' 'COMMENT'
-'COMMENT_1' '<' 'COMMENT'
-'COMMENT_1' '>' 'COMMENT'
-'COMMENT_1' '!' 'COMMENT'
-'COMMENT_1' '?' 'COMMENT'
-'COMMENT_1' ':' 'COMMENT'
-'COMMENT_1' '~' 'COMMENT'
-'COMMENT_1' '&' 'COMMENT'
-'COMMENT_1' '|' 'COMMENT'
-'COMMENT_1' '(' 'COMMENT'
-'COMMENT_1' ')' 'COMMENT'
-'COMMENT_1' '[' 'COMMENT'
-'COMMENT_1' ']' 'COMMENT'
-'COMMENT_1' '{' 'COMMENT'
-'COMMENT_1' '}' 'COMMENT'
-'COMMENT_1' ';' 'COMMENT'
-'COMMENT_1' ',' 'COMMENT'
-'COMMENT_1' '.' 'COMMENT'
-'COMMENT_1' '#' 'COMMENT'
-'COMMENT_1' '"' 'COMMENT'
-'COMMENT_1' 's' 'COMMENT'
-'COMMENT_1' '\'' 'COMMENT'
-'COMMENT_1' '\\' 'COMMENT'		; (COMMENT)
-'COMMENT_1' '*' 'COMMENT_1'		; COMMENT SEC STAR
-'COMMENT_1' '/' '0'				; END COMMENT
-'0' '=' '*='					; ASSING/EQUALS
-'*=' '=' '*=='					; EQUALS
-'0' '<' '*<'					; LESS/LESS_EQ/SHIFT_L
-'*<' '<' '*<<'					; SHIFT_L
-'*<' '=' '*<='					; LESS_EQ
-'0' '>' '*>'					; GREATER/GREATER_EQ/SHIFT_R
-'*>' '>' '*>>'					; SHIFT_R
-'*>' '=' '*>='					; GREATER_EQ
-'0' '!' '*!'					; NOT
-'*!' '=' '*!='					; DIFFERENT
-'0' '?' '*?'					; IF_THEN
-'0' ':' '*:'					; IF_ELSE
-'0' '~' '*~'					; NOT_B
-'0' '^' '*^'					; XOR_B
-'0' '&' '*&'					; AND_B
-'*&' '&' '*&&'					; AND
-'0' '|' '*|'					; OR_B
-'*|' '|' '*||'					; OR
-'0' '(' '*('
-'0' ')' '*)'					; PARENTHESES
-'0' '[' '*['
-'0' ']' '*]'					; BRACKETS
-'0' '{' '*{'
-'0' '}' '*}'					; BRACES
-'0' ';' '*;'					; END_EXP
-'0' ',' '*,'					; SEPARATOR
-'0' '.' '*.'					; INTERPUNCT
-'0' '#' '*#'					; HASH
+'0' ' ' '0' 'nil'						; WHITESPACES
+'0' 'a' '*IDENTIFIER' 'nil'
+'0' '_' '*IDENTIFIER' 'nil'
+'*IDENTIFIER' 'a' '*IDENTIFIER' 'nil'
+'*IDENTIFIER' '_' '*IDENTIFIER' 'nil'
+'*IDENTIFIER' 'n' '*IDENTIFIER' 'nil'	; IDENTIFIERS
+'0' '\'' 'CHAR_0' 'nil'
+'CHAR_0' ' ' 'CHAR' 'nil'
+'CHAR_0' 'a' 'CHAR' 'nil'
+'CHAR_0' 'n' 'CHAR' 'nil'
+'CHAR_0' '+' 'CHAR' 'nil'
+'CHAR_0' '-' 'CHAR' 'nil'
+'CHAR_0' '*' 'CHAR' 'nil'
+'CHAR_0' '/' 'CHAR' 'nil'
+'CHAR_0' '%' 'CHAR' 'nil'
+'CHAR_0' '=' 'CHAR' 'nil'
+'CHAR_0' '<' 'CHAR' 'nil'
+'CHAR_0' '>' 'CHAR' 'nil'
+'CHAR_0' '!' 'CHAR' 'nil'
+'CHAR_0' '?' 'CHAR' 'nil'
+'CHAR_0' ':' 'CHAR' 'nil'
+'CHAR_0' '~' 'CHAR' 'nil'
+'CHAR_0' '&' 'CHAR' 'nil'
+'CHAR_0' '|' 'CHAR' 'nil'
+'CHAR_0' '(' 'CHAR' 'nil'
+'CHAR_0' ')' 'CHAR' 'nil'
+'CHAR_0' '[' 'CHAR' 'nil'
+'CHAR_0' ']' 'CHAR' 'nil'
+'CHAR_0' '{' 'CHAR' 'nil'
+'CHAR_0' '}' 'CHAR' 'nil'
+'CHAR_0' ';' 'CHAR' 'nil'
+'CHAR_0' ',' 'CHAR' 'nil'
+'CHAR_0' '.' 'CHAR' 'nil'
+'CHAR_0' '#' 'CHAR' 'nil'
+'CHAR_0' '"' 'CHAR' 'nil'
+'CHAR_0' 's' 'CHAR' 'nil'
+'CHAR_0' '\\' 'CHAR_CNTRL' 'nil'
+'CHAR_CNTRL' 'a' 'CHAR' 'nil'
+'CHAR_CNTRL' 'n' 'CHAR' 'nil'
+'CHAR_CNTRL' '\'' 'CHAR' 'nil'
+'CHAR_CNTRL' '\\' 'CHAR' 'nil'
+'CHAR' '\'' '*CONSTANT' 'nil'
+'0' 'n' '*CONSTANT' 'nil'
+'*CONSTANT' 'n' '*CONSTANT' 'nil'		; CONSTANTS
+'0' '"' 'STRING_0' 'nil'
+'STRING_0' ' ' 'STRING_0' 'nil'
+'STRING_0' 'a' 'STRING_0' 'nil'
+'STRING_0' 'n' 'STRING_0' 'nil'
+'STRING_0' '+' 'STRING_0' 'nil'
+'STRING_0' '-' 'STRING_0' 'nil'
+'STRING_0' '*' 'STRING_0' 'nil'
+'STRING_0' '/' 'STRING_0' 'nil'
+'STRING_0' '%' 'STRING_0' 'nil'
+'STRING_0' '=' 'STRING_0' 'nil'
+'STRING_0' '<' 'STRING_0' 'nil'
+'STRING_0' '>' 'STRING_0' 'nil'
+'STRING_0' '!' 'STRING_0' 'nil'
+'STRING_0' '?' 'STRING_0' 'nil'
+'STRING_0' ':' 'STRING_0' 'nil'
+'STRING_0' '~' 'STRING_0' 'nil'
+'STRING_0' '&' 'STRING_0' 'nil'
+'STRING_0' '|' 'STRING_0' 'nil'
+'STRING_0' '(' 'STRING_0' 'nil'
+'STRING_0' ')' 'STRING_0' 'nil'
+'STRING_0' '[' 'STRING_0' 'nil'
+'STRING_0' ']' 'STRING_0' 'nil'
+'STRING_0' '{' 'STRING_0' 'nil'
+'STRING_0' '}' 'STRING_0' 'nil'
+'STRING_0' ';' 'STRING_0' 'nil'
+'STRING_0' ',' 'STRING_0' 'nil'
+'STRING_0' '.' 'STRING_0' 'nil'
+'STRING_0' '#' 'STRING_0' 'nil'
+'STRING_0' 's' 'STRING_0' 'nil'
+'STRING_0' '\'' 'STRING_0' 'nil'
+'STRING_0' '\\' 'STRING_1' 'nil'
+'STRING_1' 'n' 'STRING_0' 'nil'
+'STRING_1' 'a' 'STRING_0' 'nil'
+'STRING_1' '"' 'STRING_0' 'nil'
+'STRING_1' '\'' 'STRING_0' 'nil'
+'STRING_1' '\\' 'STRING_0' 'nil'
+'STRING_0' '"' '*STRING' 'nil'		; STRING_LITERAL
+'0' '+' '*+' 'nil'					; ADD/INC
+'*+' '+' '*++' 'nil'					; INC
+'0' '-' '*-' 'nil'					; SUB/DEC
+'*-' '-' '*--' 'nil'					; DEC
+'0' '*' '**' 'nil'					; MULT
+'0' '%' '*%' 'nil'					; MODULE
+'0' '/' '*/' 'nil'					; DIVISION/COMMENT
+'*/' '*' 'COMMENT' 'nil'				; INIT COMMENT
+'COMMENT' ' ' 'COMMENT' 'nil'
+'COMMENT' 'a' 'COMMENT' 'nil'
+'COMMENT' '_' 'COMMENT' 'nil'
+'COMMENT' 'n' 'COMMENT' 'nil'
+'COMMENT' '+' 'COMMENT' 'nil'
+'COMMENT' '-' 'COMMENT' 'nil'
+'COMMENT' '/' 'COMMENT' 'nil'
+'COMMENT' '%' 'COMMENT' 'nil'
+'COMMENT' '=' 'COMMENT' 'nil'
+'COMMENT' '<' 'COMMENT' 'nil'
+'COMMENT' '>' 'COMMENT' 'nil'
+'COMMENT' '!' 'COMMENT' 'nil'
+'COMMENT' '?' 'COMMENT' 'nil'
+'COMMENT' ':' 'COMMENT' 'nil'
+'COMMENT' '~' 'COMMENT' 'nil'
+'COMMENT' '&' 'COMMENT' 'nil'
+'COMMENT' '|' 'COMMENT' 'nil'
+'COMMENT' '(' 'COMMENT' 'nil'
+'COMMENT' ')' 'COMMENT' 'nil'
+'COMMENT' '[' 'COMMENT' 'nil'
+'COMMENT' ']' 'COMMENT' 'nil'
+'COMMENT' '{' 'COMMENT' 'nil'
+'COMMENT' '}' 'COMMENT' 'nil'
+'COMMENT' ';' 'COMMENT' 'nil'
+'COMMENT' ',' 'COMMENT' 'nil'
+'COMMENT' '.' 'COMMENT' 'nil'
+'COMMENT' '#' 'COMMENT' 'nil'
+'COMMENT' '"' 'COMMENT' 'nil'
+'COMMENT' 's' 'COMMENT' 'nil'
+'COMMENT' '\'' 'COMMENT' 'nil'
+'COMMENT' '\\' 'COMMENT' 'nil'		; (COMMENT)
+'COMMENT' '*' 'COMMENT_1' 'nil'		; COMMENT SEC STAR
+'COMMENT_1' ' ' 'COMMENT' 'nil'
+'COMMENT_1' 'a' 'COMMENT' 'nil'
+'COMMENT_1' '_' 'COMMENT' 'nil'
+'COMMENT_1' 'n' 'COMMENT' 'nil'
+'COMMENT_1' '+' 'COMMENT' 'nil'
+'COMMENT_1' '-' 'COMMENT' 'nil'
+'COMMENT_1' '%' 'COMMENT' 'nil'
+'COMMENT_1' '=' 'COMMENT' 'nil'
+'COMMENT_1' '<' 'COMMENT' 'nil'
+'COMMENT_1' '>' 'COMMENT' 'nil'
+'COMMENT_1' '!' 'COMMENT' 'nil'
+'COMMENT_1' '?' 'COMMENT' 'nil'
+'COMMENT_1' ':' 'COMMENT' 'nil'
+'COMMENT_1' '~' 'COMMENT' 'nil'
+'COMMENT_1' '&' 'COMMENT' 'nil'
+'COMMENT_1' '|' 'COMMENT' 'nil'
+'COMMENT_1' '(' 'COMMENT' 'nil'
+'COMMENT_1' ')' 'COMMENT' 'nil'
+'COMMENT_1' '[' 'COMMENT' 'nil'
+'COMMENT_1' ']' 'COMMENT' 'nil'
+'COMMENT_1' '{' 'COMMENT' 'nil'
+'COMMENT_1' '}' 'COMMENT' 'nil'
+'COMMENT_1' ';' 'COMMENT' 'nil'
+'COMMENT_1' ',' 'COMMENT' 'nil'
+'COMMENT_1' '.' 'COMMENT' 'nil'
+'COMMENT_1' '#' 'COMMENT' 'nil'
+'COMMENT_1' '"' 'COMMENT' 'nil'
+'COMMENT_1' 's' 'COMMENT' 'nil'
+'COMMENT_1' '\'' 'COMMENT' 'nil'
+'COMMENT_1' '\\' 'COMMENT' 'nil'		; (COMMENT)
+'COMMENT_1' '*' 'COMMENT_1' 'nil'		; COMMENT SEC STAR
+'COMMENT_1' '/' '0' 'nil'				; END COMMENT
+'0' '=' '*=' 'nil'					; ASSING/EQUALS
+'*=' '=' '*==' 'nil'					; EQUALS
+'0' '<' '*<' 'nil'					; LESS/LESS_EQ/SHIFT_L
+'*<' '<' '*<<' 'nil'					; SHIFT_L
+'*<' '=' '*<=' 'nil'					; LESS_EQ
+'0' '>' '*>' 'nil'					; GREATER/GREATER_EQ/SHIFT_R
+'*>' '>' '*>>' 'nil'					; SHIFT_R
+'*>' '=' '*>=' 'nil'					; GREATER_EQ
+'0' '!' '*!' 'nil'					; NOT
+'*!' '=' '*!=' 'nil'					; DIFFERENT
+'0' '?' '*?' 'nil'					; IF_THEN
+'0' ':' '*:' 'nil'					; IF_ELSE
+'0' '~' '*~' 'nil'					; NOT_B
+'0' '^' '*^' 'nil'					; XOR_B
+'0' '&' '*&' 'nil'					; AND_B
+'*&' '&' '*&&' 'nil'					; AND
+'0' '|' '*|' 'nil'					; OR_B
+'*|' '|' '*||' 'nil'					; OR
+'0' '(' '*(' 'nil'
+'0' ')' '*)' 'nil'					; PARENTHESES
+'0' '[' '*[' 'nil'
+'0' ']' '*]' 'nil'					; BRACKETS
+'0' '{' '*{' 'nil'
+'0' '}' '*}' 'nil'					; BRACES
+'0' ';' '*;' 'nil'					; END_EXP
+'0' ',' '*,' 'nil'					; SEPARATOR
+'0' '.' '*.' 'nil'					; INTERPUNCT
+'0' '#' '*#' 'nil'					; HASH

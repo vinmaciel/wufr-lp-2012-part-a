@@ -17,7 +17,7 @@
 typedef struct {
 	Table symbolTable;
 	Table stateTable;
-	int** production;	// production[current_state][symbol] => next_state
+	int** production[2];	// production[current_state][symbol] => (next_state, semantic_function)
 	int* submachine[2];	// submachine[current_state] => (next_machine, next_state_after_return)
 } AutomatonStruct;
 

@@ -1,0 +1,19 @@
+import "library";
+
+var int variable0;
+var bool variable1;
+
+procedure void procedure0() {
+	label0:
+	goto label0;
+}
+
+procedure int procedure1(int param0) {
+	label1:
+	goto label1;
+}
+
+procedure bool procedure0(int param1, bool param2) {
+	label2:
+	goto label2;
+}

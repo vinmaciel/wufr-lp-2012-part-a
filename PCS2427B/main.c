@@ -23,6 +23,9 @@ int main() {
 	FILE* input;
 	int accept;
 
+	int i,j,k;
+	AutomataList list;
+
 	// create lexical analyzer
 	input = fopen("Lexer", "r");
 	if(input == NULL) {
@@ -42,6 +45,30 @@ int main() {
 		exit(3);
 	}
 	createMachine(input, &parser);
+
+	for(i = 0, list = parser->automataList; i < parser->automataTable.size && list != NULL; i++, list = list->next) {
+		printf("$machine: %s\n", parser->automataTable.elem[i]);fflush(stdout);
+
+		if(list == NULL) {
+			printf("Ooops\n");
+			fflush(stdout);
+		}
+		else {
+
+			for(j = 0; j < list->elem->symbolTable.size; j++) {
+				for(k = 0; k < list->elem->stateTable.size; k++) {
+					printf("%2d ", list->elem->production[0][k][j]);fflush(stdout);
+				}
+				printf("\n");fflush(stdout);
+			}
+
+			printf("\n");fflush(stdout);
+		}
+	}
+	if(list == NULL) {
+		printf("it's just it\n");fflush(stdout);
+	}
+
 
 	// get keyword table
 	input = fopen("Keywords", "r");

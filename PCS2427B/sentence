@@ -1,0 +1,17 @@
+7
+'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'while0' 'id0'
+7
+'DO' 'GOTO' 'IF' 'WHILE' 'IDENTIFIER' ';' ':'
+
+'*inicial' 'DO' 'do0' 'nil'
+
+'*inicial' 'GOTO' 'goto0' 'nil'
+'goto0' 'IDENTIFIER' 'goto1' 'nil'
+'goto1' ';' '*inicial' 'nil'
+
+'*inicial' 'IF' 'if0' 'nil'
+
+'*inicial' 'WHILE' 'while0' 'nil'
+
+'*inicial' 'IDENTIFIER' 'id0' 'nil'
+'id0' ':' '*inicial' 'nil'
