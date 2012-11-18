@@ -13,11 +13,12 @@
 #include "Table.h"
 #include "Automaton.h"
 #include "Token.h"
+#include "Semantics.h"
 
 void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 	char stateName[NAME_LENGTH], symbol[NAME_LENGTH], nextStateName[NAME_LENGTH];
-	char submachineName[64];
-	int stateIndex, symbolIndex, nextStateIndex;
+	char submachineName[NAME_LENGTH], semanticName[NAME_LENGTH];
+	int stateIndex, symbolIndex, nextStateIndex, semanticIndex;
 	int i, j;
 
 	submachineName[0] = '\0';
@@ -30,17 +31,24 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 	createTable(input, &((*automaton)->symbolTable));
 
 	// allocate memory to the production table
-	(*automaton)->production = (int**) malloc(((*automaton)->stateTable.size)*sizeof(int*));
-	for(i = 0; i < (*automaton)->stateTable.size; i++)
-		(*automaton)->production[i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+	(*automaton)->production[0] = (int**) malloc(((*automaton)->stateTable.size)*sizeof(int*));
+	(*automaton)->production[1] = (int**) malloc(((*automaton)->stateTable.size)*sizeof(int*));
+	for(i = 0; i < (*automaton)->stateTable.size; i++) {
+		(*automaton)->production[0][i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+		(*automaton)->production[1][i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+	}
+
 	// allocate memory to the submachine-call table
 	(*automaton)->submachine[0] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
 	(*automaton)->submachine[1] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
 
 	// set all productions to rejection state
 	for(i = 0; i < (*automaton)->stateTable.size; i++)
-		for(j = 0; j < (*automaton)->symbolTable.size; j++)
-			(*automaton)->production[i][j] = -1;
+		for(j = 0; j < (*automaton)->symbolTable.size; j++) {
+			(*automaton)->production[0][i][j] = -1;
+			(*automaton)->production[1][i][j] = -1;
+		}
+
 	// clear all submachine calls
 	for(i = 0; i < (*automaton)->symbolTable.size; i++) {
 		(*automaton)->submachine[0][i] = -1;
@@ -53,11 +61,13 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 	while(stateName[0] != EOF) {
 		getName(input, symbol);
 		getName(input, nextStateName);
+		getName(input, semanticName);
 
-		// get the indexes (current state, symbol consumed, next state)
+		// get the indexes (current state, symbol consumed, next state, semantic function)
 		stateIndex = findIndex((*automaton)->stateTable, stateName);
 		symbolIndex = findIndex((*automaton)->symbolTable, symbol);
 		nextStateIndex = findIndex((*automaton)->stateTable, nextStateName);
+		semanticIndex = getSemanticFunctionIndex(semanticName);
 
 		// verify validity
 		if(stateIndex < 0) {
@@ -81,17 +91,25 @@ void createGraph(FILE* input, Automaton* automaton, Table automataTable) {
 				(*automaton)->submachine[0][stateIndex] = findIndex(automataTable, submachineName);
 				(*automaton)->submachine[1][stateIndex] = nextStateIndex;
 			}
-			else
-				(*automaton)->production[stateIndex][symbolIndex] = nextStateIndex;
+			else {
+				(*automaton)->production[0][stateIndex][symbolIndex] = nextStateIndex;
+				(*automaton)->production[1][stateIndex][symbolIndex] = semanticIndex;
+			}
 		}
 
 		getName(input, stateName);
 	}
 }
 
+/*
+ * Generates a new automaton with submachine calls
+ *
+ * @param input file source.
+ * @param automaton pointer to store the structure.
+ */
 void createAutomaton(FILE* input, Automaton* automaton) {
-	char stateName[NAME_LENGTH], symbol[NAME_LENGTH], nextStateName[NAME_LENGTH];
-	int stateIndex, symbolIndex, nextStateIndex;
+	char stateName[NAME_LENGTH], symbol[NAME_LENGTH], nextStateName[NAME_LENGTH], semanticName[NAME_LENGTH];
+	int stateIndex, symbolIndex, nextStateIndex, semanticIndex;
 	int i, j;
 
 	// allocate memory to automaton (struct)
@@ -102,17 +120,24 @@ void createAutomaton(FILE* input, Automaton* automaton) {
 	createTable(input, &((*automaton)->symbolTable));
 
 	// allocate memory to the production table
-	(*automaton)->production = (int**) malloc(((*automaton)->stateTable.size)*sizeof(int*));
-	for(i = 0; i < (*automaton)->stateTable.size; i++)
-		(*automaton)->production[i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+	(*automaton)->production[0] = (int**) malloc(((*automaton)->stateTable.size)*sizeof(int*));
+	(*automaton)->production[1] = (int**) malloc(((*automaton)->stateTable.size)*sizeof(int*));
+	for(i = 0; i < (*automaton)->stateTable.size; i++) {
+		(*automaton)->production[0][i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+		(*automaton)->production[1][i] = (int*) malloc(((*automaton)->symbolTable.size)*sizeof(int));
+	}
+
 	// allocate memory to the submachine-call table
 	(*automaton)->submachine[0] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
 	(*automaton)->submachine[1] = (int*) malloc(((*automaton)->stateTable.size)*sizeof(int));
 
 	// set all productions to rejection state
 	for(i = 0; i < (*automaton)->stateTable.size; i++)
-		for(j = 0; j < (*automaton)->symbolTable.size; j++)
-			(*automaton)->production[i][j] = -1;
+		for(j = 0; j < (*automaton)->symbolTable.size; j++) {
+			(*automaton)->production[0][i][j] = -1;
+			(*automaton)->production[1][i][j] = -1;
+		}
+
 	// clear all submachine calls
 	for(i = 0; i < (*automaton)->symbolTable.size; i++) {
 		(*automaton)->submachine[0][i] = -1;
@@ -125,11 +150,13 @@ void createAutomaton(FILE* input, Automaton* automaton) {
 	while(stateName[0] != EOF) {
 		getName(input, symbol);
 		getName(input, nextStateName);
+		getName(input, semanticName);
 
 		// get the indexes (current state, symbol consumed, next state)
 		stateIndex = findIndex((*automaton)->stateTable, stateName);
 		symbolIndex = findIndex((*automaton)->symbolTable, symbol);
 		nextStateIndex = findIndex((*automaton)->stateTable, nextStateName);
+		semanticIndex = getSemanticFunctionIndex(semanticName);
 
 		// verify validity
 		if(stateIndex < 0) {
@@ -147,8 +174,10 @@ void createAutomaton(FILE* input, Automaton* automaton) {
 			fflush(stdout);
 			exit(2);
 		}
-		else // set a new transition
-			(*automaton)->production[stateIndex][symbolIndex] = nextStateIndex;
+		else {
+			(*automaton)->production[0][stateIndex][symbolIndex] = nextStateIndex;
+			(*automaton)->production[1][stateIndex][symbolIndex] = semanticIndex;
+		}
 
 		getName(input, stateName);
 	}
@@ -213,7 +242,7 @@ int generateToken(FILE* input, Automaton lexer, char* recycled, Token* token) {
 
 			// if symbol exists in the alphabet, try the production
 			if(symbolIndex >= 0)
-				nextStateIndex = lexer->production[currentStateIndex][symbolIndex];
+				nextStateIndex = lexer->production[0][currentStateIndex][symbolIndex];
 			// else, ERROR
 			else {
 				*recycled = symbol[0];
