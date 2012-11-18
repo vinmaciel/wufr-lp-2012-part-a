@@ -119,6 +119,14 @@ void createDynamicTable(DynamicTable* table) {
 	*table = NULL;
 }
 
+/**
+ * Insert an new item on the table.
+ *
+ * @param table to be inserted into.
+ * @param name to be inserted.
+ *
+ * @return the index of the added row, or the index of the existing row (if it already exists).
+ */
 int addToTable(DynamicTable* table, const char* name) {
 	DynamicTable newCell, search;
 	int index;
@@ -147,6 +155,14 @@ int addToTable(DynamicTable* table, const char* name) {
 	return index;
 }
 
+/**
+ * Looks for the existence of specified name entry in the Dynamic Table.
+ *
+ * @param table to look into.
+ * @param name content in the row of the table.
+ *
+ * @return the index of the item in the table, -1 if not found.
+ */
 int lookUpForCell(DynamicTable table, const char* name) {
 	DynamicTable search;
 	int i;

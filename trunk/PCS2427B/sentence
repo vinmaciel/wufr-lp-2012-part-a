@@ -3,15 +3,15 @@
 7
 'DO' 'GOTO' 'IF' 'WHILE' 'IDENTIFIER' ';' ':'
 
-'*inicial' 'DO' 'do0' 'nil'
+'*inicial'		'DO'			'do0' 			'nil'
 
-'*inicial' 'GOTO' 'goto0' 'nil'
-'goto0' 'IDENTIFIER' 'goto1' 'nil'
-'goto1' ';' '*inicial' 'nil'
+'*inicial'		'GOTO'			'goto0'			'nil'
+'goto0'			'IDENTIFIER'	'goto1'			'setIdentifier'
+'goto1'			';'				'*inicial'		'setJump'
 
-'*inicial' 'IF' 'if0' 'nil'
+'*inicial'		'IF'			'if0'			'nil'
 
-'*inicial' 'WHILE' 'while0' 'nil'
+'*inicial'		'WHILE'			'while0'		'nil'
 
-'*inicial' 'IDENTIFIER' 'id0' 'nil'
-'id0' ':' '*inicial' 'nil'
+'*inicial'		'IDENTIFIER'	'id0'			'setIdentifier'
+'id0'			':'				'*inicial'		'setLabel'

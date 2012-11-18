@@ -14,6 +14,7 @@
 #include "Token.h"
 #include "AutomataList.h"
 #include "AutomataStack.h"
+#include "Semantics.h"
 
 void createMachine(FILE* input, Machine* machine) {
 	int i;
@@ -218,7 +219,6 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	int currentStateIndex, symbolIndex, nextStateIndex, currentAutomatonIndex;
 	int noTransition, result;
 
-	int index;
 	char recycled;
 	Automaton currentAutomaton;
 	AutomataStack stack;
@@ -226,6 +226,8 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	DynamicTable symbols, search;
 	char fileName[64];
 	FILE *input, *tokenized, *compiled, *symbol;
+
+	semantic semanticAction;
 
 	/* open input file */
 	input = fopen(inputFileName, "r");
@@ -269,6 +271,8 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	noTransition = 0;
 	recycled = 0;
 	strcpy(recycledToken->type, "NULL");
+
+	semanticAction = semanticFunction(0);
 
 	/* get the initial automaton */
 	currentAutomatonIndex = 0;
@@ -317,13 +321,8 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 				exit(3);
 				break;
 			}
-			verifyKeyword(keywords, &token);
 
-			if(!strcmp(token->type, "IDENTIFIER")) {
-				index = addToTable(&symbols, token->value);
-				printf("symbol index: %d\n", index);fflush(stdout);
-				integerToString(token->value, index, 10);
-			}
+			verifyKeyword(keywords, &token);
 		}
 		else {
 			printf("recycled token\n");fflush(stdout);
@@ -343,7 +342,10 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 				/* do the production */
 				if(symbolIndex >= 0) {
 					nextStateIndex = currentAutomaton->production[0][currentStateIndex][symbolIndex];
+					semanticAction = semanticFunction(currentAutomaton->production[1][currentStateIndex][symbolIndex]);
 					printf("produce: %2d %2d => %2d\n", currentStateIndex, symbolIndex, nextStateIndex);fflush(stdout);
+
+					semanticAction(compiled, &symbols, token);
 				}
 
 				/*

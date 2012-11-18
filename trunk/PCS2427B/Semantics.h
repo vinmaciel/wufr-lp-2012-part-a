@@ -8,15 +8,18 @@
 #ifndef SEMANTIC_H_
 #define SEMANTIC_H_
 
-typedef void (*semantic)();
+#include "Token.h"
 
-/******** PARAMETERS ********/
-char semantic_label[256];
+typedef void (*semantic)(FILE*, DynamicTable*, Token);
 
-/******** GENERAL ********/
 int getSemanticFunctionIndex(const char* label);
 semantic semanticFunction(int index);
 void cleanSemanticParameters();
+
+/******** GENERAL ********/
+void nil(FILE* file, DynamicTable* symbols, Token token);
+void setIdentifier(FILE* file, DynamicTable* symbols, Token token);
+void endBlock(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LIBRARY ********/
 
@@ -25,8 +28,10 @@ void cleanSemanticParameters();
 /******** PROCEDURE ********/
 
 /******** LABEL ********/
+void setLabel(FILE* file, DynamicTable* symbols, Token token);
 
 /******** JUMP ********/
+void setJump(FILE* file, DynamicTable* symbols, Token token);
 
 /******** CONDITIONAL ********/
 

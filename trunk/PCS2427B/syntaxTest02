@@ -11,9 +11,14 @@ procedure void procedure0() {
 procedure int procedure1(int param0) {
 	label1:
 	goto label1;
+	label4:
+	goto label1;
+	goto label4;
 }
 
 procedure bool procedure0(int param1, bool param2) {
 	label2:
+	label3:
+	label5:
 	goto label2;
 }
