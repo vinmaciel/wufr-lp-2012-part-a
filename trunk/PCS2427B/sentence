@@ -1,7 +1,7 @@
-7
-'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'while0' 'id0'
-7
-'DO' 'GOTO' 'IF' 'WHILE' 'IDENTIFIER' ';' ':'
+11
+'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'while0' 'id0' 'id1' 'id2' 'id3' 'id4'
+11
+'DO' 'GOTO' 'IF' 'WHILE' 'IDENTIFIER' 'CONSTANT' ';' ':' '=' '+' '-'
 
 '*inicial'		'DO'			'do0' 			'nil'
 
@@ -20,8 +20,6 @@
 'id1'			'CONSTANT'		'id2'			'nil'
 'id2'			'+'				'id3'			'nil'
 'id2'			'-'				'id3'			'nil'
-'id2'			'*'				'id3'			'nil'
-'id2'			'/'				'id3'			'nil'
 'id3'			'IDENTIFIER'	'id4'			'nil'
 'id3'			'CONSTANT'		'id4'			'nil'
 'id4'			';'				'*inicial'		'nil'

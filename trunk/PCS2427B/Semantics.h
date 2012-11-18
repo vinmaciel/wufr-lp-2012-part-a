@@ -19,12 +19,14 @@ void cleanSemanticParameters();
 /******** GENERAL ********/
 void nil(FILE* file, DynamicTable* symbols, Token token);
 void setIdentifier(FILE* file, DynamicTable* symbols, Token token);
+void setType(FILE* file, DynamicTable* symbols, Token token);
 void endBlock(FILE* file, DynamicTable* symbols, Token token);
 void endFile(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LIBRARY ********/
 
 /******** VARIABLE ********/
+void setVar(FILE* file, DynamicTable* symbols, Token token);
 
 /******** PROCEDURE ********/
 
