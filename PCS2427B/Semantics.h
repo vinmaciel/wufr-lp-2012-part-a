@@ -19,6 +19,7 @@ void cleanSemanticParameters();
 /******** GENERAL ********/
 void nil(FILE* file, DynamicTable* symbols, Token token);
 void setIdentifier(FILE* file, DynamicTable* symbols, Token token);
+void setConstant(FILE* file, DynamicTable* symbols, Token token);
 void setType(FILE* file, DynamicTable* symbols, Token token);
 void endBlock(FILE* file, DynamicTable* symbols, Token token);
 void endFile(FILE* file, DynamicTable* symbols, Token token);
@@ -43,6 +44,9 @@ void setJump(FILE* file, DynamicTable* symbols, Token token);
 /******** SUBROTINE CALL ********/
 
 /******** ATTRIBUTION ********/
+void setDest(FILE* file, DynamicTable* symbols, Token token);
+void setOperator(FILE* file, DynamicTable* symbols, Token token);
+void setAttribution(FILE* file, DynamicTable* symbols, Token token);
 
 
 #endif /* SEMANTIC_H_ */

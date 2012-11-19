@@ -1,7 +1,7 @@
-11
-'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'while0' 'id0' 'id1' 'id2' 'id3' 'id4'
-11
-'DO' 'GOTO' 'IF' 'WHILE' 'IDENTIFIER' 'CONSTANT' ';' ':' '=' '+' '-'
+15
+'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'if1' 'if2' 'if3' 'if4' 'while0' 'id0' 'id1' 'id2' 'id3' 'id4'
+13
+'DO' 'GOTO' 'IF' 'WHILE' 'IDENTIFIER' 'CONSTANT' ';' ':' '=' '+' '-' '*' '/'
 
 '*inicial'		'DO'			'do0' 			'nil'
 
@@ -15,11 +15,14 @@
 
 '*inicial'		'IDENTIFIER'	'id0'			'setIdentifier'
 'id0'			':'				'*inicial'		'setLabel'
-'id0'			'='				'id1'			'nil'
-'id1'			'IDENTIFIER'	'id2'			'nil'
-'id1'			'CONSTANT'		'id2'			'nil'
-'id2'			'+'				'id3'			'nil'
-'id2'			'-'				'id3'			'nil'
-'id3'			'IDENTIFIER'	'id4'			'nil'
-'id3'			'CONSTANT'		'id4'			'nil'
-'id4'			';'				'*inicial'		'nil'
+'id0'			'='				'id1'			'setDest'
+'id1'			'IDENTIFIER'	'id2'			'setIdentifier'
+'id1'			'CONSTANT'		'id2'			'setConstant'
+'id2'			';'				'*inicial'		'setAttribution'
+'id2'			'+'				'id3'			'setOperator'
+'id2'			'-'				'id3'			'setOperator'
+'id2'			'*'				'id3'			'setOperator'
+'id2'			'/'				'id3'			'setOperator'
+'id3'			'IDENTIFIER'	'id4'			'setIdentifier'
+'id3'			'CONSTANT'		'id4'			'setConstant'
+'id4'			';'				'*inicial'		'setAttribution'

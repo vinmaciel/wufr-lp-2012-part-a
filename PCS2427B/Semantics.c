@@ -8,13 +8,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include "Semantics.h"
+#include "Token.h"
 #include "Table.h"
 
 
 /******** PRIVATE PARAMETERS ********/
 char identifier[64];
+int constant;
 char label[64];
 char type[5];
+char destination[64];
+char operator[2];
 /************************************/
 
 /**
@@ -42,6 +46,14 @@ int getSemanticFunctionIndex(const char* label) {
 		return 6;
 	if(!strcmp(label, "setVar"))
 		return 7;
+	if(!strcmp(label, "setConstant"))
+		return 8;
+	if(!strcmp(label, "setDest"))
+		return 9;
+	if(!strcmp(label, "setOperator"))
+		return 10;
+	if(!strcmp(label, "setAttribution"))
+		return 11;
 
 	return -1;
 }
@@ -71,6 +83,14 @@ semantic semanticFunction(int index) {
 		return setType;
 	case 7:
 		return setVar;
+	case 8:
+		return setConstant;
+	case 9:
+		return setDest;
+	case 10:
+		return setOperator;
+	case 11:
+		return setAttribution;
 	}
 	return nil;
 }
@@ -78,6 +98,11 @@ semantic semanticFunction(int index) {
 void cleanSemanticParameters() {
 	strcpy(identifier, "");
 	strcpy(label, "");
+	strcpy(type, "");
+	strcpy(destination, "");
+	strcpy(operator, "");
+
+	constant = -1;
 }
 
 /******** GENERAL ********/
@@ -89,6 +114,11 @@ void nil(FILE* file, DynamicTable* symbols, Token token) {
 void setIdentifier(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: id\n");fflush(stdout);
 	strcpy(identifier, token->value);
+}
+// 8
+void setConstant(FILE* file, DynamicTable* symbols, Token token) {
+	printf("semantic: constant\n");fflush(stdout);
+	constant = stringToInteger(token->value, 2);
 }
 // 6
 void setType(FILE* file, DynamicTable* symbols, Token token) {
@@ -127,11 +157,15 @@ void endFile(FILE* file, DynamicTable* symbols, Token token) {
 
 	// the end of the file must contain the data allocation
 	for(search = *symbols; search != NULL; search = search->next) {
-		if(!strcmp(search->class, "int") || !strcmp(search->class, "bool")) {
-			fprintf(file, "%s\t K\t0000\n", search->name);
+		if(!strcmp(search->class, "variable")) {
+			fprintf(file, "%s\t K\t/0000\n", search->name);
 			fflush(file);
 		}
 	}
+
+	// EOF
+	fprintf(file, "\t#\n");
+	fflush(file);
 }
 /******** LIBRARY ********/
 
@@ -144,7 +178,7 @@ void setVar(FILE* file, DynamicTable* symbols, Token token) {
 	i = lookUpForCell(*symbols, identifier, "variable");
 
 	if(i == -1) {
-		i = addToTable(symbols, identifier, type);
+		i = addToTable(symbols, identifier, "variable");
 		defineRow(symbols, i);
 		strcpy(identifier, "");
 		strcpy(type, "");
@@ -172,6 +206,7 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token) {
 		defineRow(symbols, i);
 		fprintf(file, "%s\tJP\t%s\n", identifier, label);
 		fflush(file);
+		strcpy(identifier, "");
 	}
 	// otherwise, add it to symbol table and activate it as current label
 	else {
@@ -204,16 +239,15 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token) {
 // 4
 void setJump(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: jump\n");fflush(stdout);
-	if(lookUpForCell(*symbols, identifier, "label") >= 0) {
-		fprintf(file, "%s\tJP\t%s\n", label, identifier);
-		fflush(file);
-	}
-	else {
+	if(lookUpForCell(*symbols, identifier, "label") == -1) {
 		addToTable(symbols, identifier, "label");
-		fprintf(file, "%s\tJP\t%s\n", label, identifier);
-		fflush(file);
 	}
+
+	fprintf(file, "%s\tJP\t%s\n", label, identifier);
+	fflush(file);
+
 	strcpy(label, "");
+	strcpy(identifier, "");
 }
 /******** CONDITIONAL ********/
 
@@ -222,4 +256,115 @@ void setJump(FILE* file, DynamicTable* symbols, Token token) {
 /******** SUBROTINE CALL ********/
 
 /******** ATTRIBUTION ********/
+// 9
+void setDest(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	printf("semantic: dest\n");fflush(stdout);
+	i = lookUpForCell(*symbols, identifier, "variable");
+
+	if(i >= 0) {
+		strcpy(destination, identifier);
+		strcpy(identifier, "");
+	}
+	else {
+		printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+		fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
+	}
+}
+// 10
+void setOperator(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	printf("semantic: operator\n");fflush(stdout);
+	strcpy(operator, token->value);
+
+	if(!strcmp(identifier, "")) {
+		fprintf(file, "%s\tLV\t/%04X\n", label, constant);
+		constant = -1;
+	}
+	else {
+		i = lookUpForCell(*symbols, identifier, "variable");
+
+		if(i >= 0) {
+			fprintf(file, "%s\tLD\t%s\n", label, identifier);
+			strcpy(identifier, "");
+		}
+	}
+	fflush(file);
+	strcpy(label, "");
+}
+// 11
+void setAttribution(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	printf("semantic: attribution\n");fflush(stdout);
+
+	if(!strcmp(operator, "")) {
+		if(!strcmp(identifier, "")) {
+			fprintf(file, "%s\tLV\t/%04X\n", label, constant);
+			fprintf(file, "\tMM\t%s\n", destination);
+			fflush(file);
+		}
+		else {
+			i = lookUpForCell(*symbols, identifier, "variable");
+
+			if(i >= 0) {
+				fprintf(file, "%s\tLD\t%s\n", label, identifier);
+				fprintf(file, "\tMM\t%s\n", destination);
+				fflush(file);
+			}
+			else {
+				printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fflush(stdout);
+				fflush(file);
+				system("PAUSE");
+				exit(5);
+			}
+		}
+	}
+	else {
+		if(!strcmp(identifier, "")) {
+			// TODO: attribution operation when the second operand is an constant
+		}
+		else {
+			i = lookUpForCell(*symbols, identifier, "variable");
+
+			if(i >= 0) {
+				if(!strcmp(operator, "+")) {
+					fprintf(file, "%s\t +\t%s\n", label, identifier);
+				}
+				else if(!strcmp(operator, "-")) {
+					fprintf(file, "%s\t -\t%s\n", label, identifier);
+				}
+				else if(!strcmp(operator, "*")) {
+					fprintf(file, "%s\t *\t%s\n", label, identifier);
+				}
+				else if(!strcmp(operator, "/")) {
+					fprintf(file, "%s\t /\t%s\n", label, identifier);
+				}
+				fprintf(file, "\tMM\t%s\n", destination);
+				fflush(file);
+			}
+			else {
+				printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fflush(stdout);
+				fflush(file);
+				system("PAUSE");
+				exit(5);
+			}
+		}
+	}
+	constant = -1;
+	strcpy(identifier, "");
+	strcpy(operator, "");
+	strcpy(destination, "");
+	strcpy(label, "");
+}
 
