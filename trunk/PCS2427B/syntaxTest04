@@ -1,0 +1,40 @@
+import "library";
+
+var int variable0;
+var bool variable1;
+var int variable2;
+
+procedure void procedure0() {
+	label0:
+	goto label0;
+	variable0 = variable1 + variable2;
+}
+
+procedure int procedure1(int param0) {
+	label1:
+	variable0 = param0;
+	label4:
+	goto label1;
+	goto label4;
+	variable1 = variable0;
+	variable0 = 9 - variable0;
+}
+
+procedure bool procedure2(int param1, bool param2) {
+	label2:
+	label3:
+	label5:
+	goto label6;
+	variable1 = 18;
+	goto label2;
+	label6:
+	goto label3;
+}
+
+procedure void procedure3() {
+	label7:
+	variable2 = variable1/variable0;
+	variable1 = variable0*variable2;
+}
+
+end
