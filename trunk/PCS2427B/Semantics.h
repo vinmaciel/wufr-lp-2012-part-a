@@ -38,6 +38,10 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token);
 void setJump(FILE* file, DynamicTable* symbols, Token token);
 
 /******** CONDITIONAL ********/
+void setConditional(FILE* file, DynamicTable* symbols, Token token);
+void endConditional(FILE* file, DynamicTable* symbols, Token token);
+void noElse(FILE* file, DynamicTable* symbols, Token token);
+void endElse(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LOOP ********/
 
