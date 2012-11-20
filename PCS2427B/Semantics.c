@@ -19,6 +19,10 @@ char label[64];
 char type[5];
 char destination[64];
 char operator[2];
+int ifCount;
+int whileCount;
+
+char auxiliar[64];
 /************************************/
 
 /**
@@ -54,6 +58,14 @@ int getSemanticFunctionIndex(const char* label) {
 		return 10;
 	if(!strcmp(label, "setAttribution"))
 		return 11;
+	if(!strcmp(label, "setConditional"))
+		return 12;
+	if(!strcmp(label, "endConditional"))
+		return 13;
+	if(!strcmp(label, "noElse"))
+		return 14;
+	if(!strcmp(label, "endElse"))
+		return 15;
 
 	return -1;
 }
@@ -91,6 +103,14 @@ semantic semanticFunction(int index) {
 		return setOperator;
 	case 11:
 		return setAttribution;
+	case 12:
+		return setConditional;
+	case 13:
+		return endConditional;
+	case 14:
+		return noElse;
+	case 15:
+		return endElse;
 	}
 	return nil;
 }
@@ -101,8 +121,11 @@ void cleanSemanticParameters() {
 	strcpy(type, "");
 	strcpy(destination, "");
 	strcpy(operator, "");
+	strcpy(auxiliar, "");
 
 	constant = -1;
+	ifCount = -1;
+	whileCount = 0;
 }
 
 /******** GENERAL ********/
@@ -128,6 +151,20 @@ void setType(FILE* file, DynamicTable* symbols, Token token) {
 // 3
 void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: EOB\n");fflush(stdout);
+	// allows end of conditional block label with NOP (instruction with no effect)
+	if(!strncmp(label, "_else", 5)) {
+		fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+		strcpy(label, "_then");
+		strcat(label, integerToString(auxiliar, ifCount, 10));
+
+		strcpy(auxiliar, "");
+	}
+	if(!strncmp(label, "_then", 5)) {
+		fprintf(file, "%s\t +\t_nil\n", label);
+		strcpy(label, "");
+	}
+	fflush(file);
+
 	// cannot end block with opened label
 	if(strcmp(label, "")) {
 		printf("ERROR: label at the end of compound statement.\n");
@@ -162,6 +199,11 @@ void endFile(FILE* file, DynamicTable* symbols, Token token) {
 			fflush(file);
 		}
 	}
+
+	// constant: 0
+	fprintf(file, "_nil\t K\t/0000\n");
+	// constant: -1
+	fprintf(file, "_inv\t K\t/FFFF\n");
 
 	// EOF
 	fprintf(file, "\t#\n");
@@ -249,7 +291,139 @@ void setJump(FILE* file, DynamicTable* symbols, Token token) {
 	strcpy(label, "");
 	strcpy(identifier, "");
 }
+
 /******** CONDITIONAL ********/
+// 12
+void setConditional(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	printf("semantic: conditional\n");fflush(stdout);
+	ifCount++;
+
+	if(!strcmp(operator, "")) {
+		if(!strcmp(identifier, "")) {
+			fprintf(file, "%s\tLV\t/%04X\n", label, constant);
+			fprintf(file, "\tJZ\t_else%d\n", ifCount);
+			fflush(file);
+
+			strcpy(label, "_if");
+			strcat(label, integerToString(auxiliar, ifCount, 10));
+
+			strcpy(auxiliar, "");
+		}
+		else {
+			i = lookUpForCell(*symbols, identifier, "variable");
+
+			if(i >= 0) {
+				fprintf(file, "%s\tLD\t%s\n", label, identifier);
+				fprintf(file, "\tJZ\t_else%d\n", ifCount);
+				fflush(file);
+
+				strcpy(label, "_if");
+				strcat(label, integerToString(auxiliar, ifCount, 10));
+
+				strcpy(auxiliar, "");
+			}
+			else {
+				printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fflush(stdout);
+				fflush(file);
+				system("PAUSE");
+				exit(5);
+			}
+		}
+	}
+	else {
+		if(!strcmp(identifier, "")) {
+			// TODO: comparison operation when the second operand is an constant
+		}
+		else {
+			i = lookUpForCell(*symbols, identifier, "variable");
+
+			if(i >= 0) {
+				fprintf(file, "\t -\t%s\n", identifier);
+				if(!strcmp(operator, "==")) {
+					fprintf(file, "\tJZ\t_if%d\n", ifCount);
+					fprintf(file, "\tJP\t_else%d\n", ifCount);
+				}
+				else if(!strcmp(operator, "<")) {
+					fprintf(file, "\tJN\t_if%d\n", ifCount);
+					fprintf(file, "\tJP\t_else%d\n", ifCount);
+				}
+				else if(!strcmp(operator, ">")) {
+					fprintf(file, "\t *\t_inv%d\n", ifCount);
+					fprintf(file, "\tJN\t_if%d\n", ifCount);
+					fprintf(file, "\tJP\t_else%d\n", ifCount);
+				}
+				fflush(file);
+
+				strcpy(label, "_if");
+				strcat(label, integerToString(auxiliar, ifCount, 10));
+
+				strcpy(auxiliar, "");
+			}
+			else {
+				printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fflush(stdout);
+				fflush(file);
+				system("PAUSE");
+				exit(5);
+			}
+		}
+	}
+}
+// 13
+void endConditional(FILE* file, DynamicTable* symbols, Token token) {
+	if(!strcmp(label, "")) {
+		fprintf(file, "\tJP\t_then%d\n", ifCount);
+		fflush(file);
+	}
+	else {
+		printf("ERROR: label at the end of compound statement.\n");
+		fprintf(file, "ERROR: label at the end of compound statement.\n");
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
+	}
+
+	strcpy(label, "_else");
+	strcat(label, integerToString(auxiliar, ifCount, 10));
+
+	strcpy(auxiliar, "");
+}
+// 14
+void noElse(FILE* file, DynamicTable* symbols, Token token) {
+	fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+	fflush(file);
+
+	strcpy(label, "_then");
+	strcat(label, integerToString(auxiliar, ifCount, 10));
+
+	strcpy(auxiliar, "");
+
+	if(!strcmp(token->type, "IDENTIFIER"))
+		setIdentifier(file, symbols, token);
+}
+// 15
+void endElse(FILE* file, DynamicTable* symbols, Token token) {
+	if(!strcmp(label, "")) {
+		strcpy(label, "_then");
+		strcat(label, integerToString(auxiliar, ifCount, 10));
+
+		strcpy(auxiliar, "");
+	}
+	else {
+		printf("ERROR: label at the end of compound statement.\n");
+		fprintf(file, "ERROR: label at the end of compound statement.\n");
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
+	}
+}
 
 /******** LOOP ********/
 

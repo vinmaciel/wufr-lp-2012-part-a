@@ -1,6 +1,7 @@
-11
+12
 'bool'
 'do'
+'else'
 'end'
 'goto'
 'if'
