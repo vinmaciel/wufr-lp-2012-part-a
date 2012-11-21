@@ -272,6 +272,7 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	recycled = 0;
 	strcpy(recycledToken->type, "NULL");
 
+	cleanSemanticParameters();
 	semanticAction = semanticFunction(0);
 
 	/* get the initial automaton */
@@ -402,8 +403,11 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	/* accept (or do not) the string */
 	if(recycled == EOF && nextStateIndex > 0 && isAcceptState(nextStateIndex, currentAutomaton->stateTable) && isEmptyStack(stack))
 		result = 1;
-	else
+	else {
+		printf("Token \"%s\" unexpected.\n", token->value);
+		fflush(stdout);
 		result = 0;
+	}
 
 	cleanAutomataStack(&stack);
 

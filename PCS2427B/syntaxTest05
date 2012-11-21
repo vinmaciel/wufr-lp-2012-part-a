@@ -1,45 +1,47 @@
 import "library";
 
 var int variable0;
-var bool variable1;
-var int variable2;
+var int variable1;
+var bool variable2;
 
 procedure void procedure0() {
-	label0:
+	variable1 = 12;
+	variable2 = 8 - variable1;
 	goto label0;
-	variable0 = variable1 + variable2;
 }
 
-procedure int procedure1(int param0) {
+procedure int procedure1(int param0, int param1) {
+	label0:
+	goto label4;
 	label1:
-	variable0 = param0;
+	goto label3;
 	label4:
+	variable0 = variable1 + variable2;
 	goto label1;
 	goto label4;
-	variable1 = variable0;
-	variable0 = 9 - variable0;
-}
-
-procedure bool procedure2(int param1, bool param2) {
-	label2:
 	label3:
-	variable1 = 18;
+	param0 = 20/variable0;
+	goto label2;
+	label5:
+	goto label6;
+	label2:
+	goto label5;
 	goto label2;
 	label6:
-	goto label3;
+	param1 = variable0*variable0;
 }
 
-procedure void procedure3(bool param3) {
-	if(param3) {
-		variable2 = variable1/variable0;
-		variable1 = variable0*variable2;
+procedure bool procedure2(bool param2) {
+	param1 = param1/variable0;
+	if(param1) {
+		param1 = 256;
 	}
 	else {
-		param3 = 138;
+		param1 = 16;
 	}
-	if(variable1 == variable2) {
-		label5:
-		goto label6;
+	label7:
+	if(param0 > param1) {
+		param0 = 4096;
 	}
 }
 

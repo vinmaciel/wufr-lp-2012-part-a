@@ -182,6 +182,15 @@ void endFile(FILE* file, DynamicTable* symbols, Token token) {
 
 	i = lookForUndefined(*symbols);
 
+	// must end the execution
+	if(!strcmp(label, ""))
+		fprintf(file, "_end\tHM\t_end\n");
+	else {
+		fprintf(file, "%s\tHM\t%s\n", label, label);
+		strcpy(label, "");
+	}
+	fflush(file);
+
 	// cannot accept file with undefined labels
 	if(i >= 0) {
 		printf("ERROR: label \"%s\" used but not defined.\n", getRow(*symbols, i)->name);
@@ -206,7 +215,7 @@ void endFile(FILE* file, DynamicTable* symbols, Token token) {
 	fprintf(file, "_inv\t K\t/FFFF\n");
 
 	// EOF
-	fprintf(file, "\t#\n");
+	fprintf(file, "\t#\t_end\n");
 	fflush(file);
 }
 /******** LIBRARY ********/
@@ -297,10 +306,11 @@ void setJump(FILE* file, DynamicTable* symbols, Token token) {
 void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 	int i;
 
-	printf("semantic: conditional\n");fflush(stdout);
+	printf("semantic: conditional ");fflush(stdout);
 	ifCount++;
 
 	if(!strcmp(operator, "")) {
+		printf("with one operand\n");fflush(stdout);
 		if(!strcmp(identifier, "")) {
 			fprintf(file, "%s\tLV\t/%04X\n", label, constant);
 			fprintf(file, "\tJZ\t_else%d\n", ifCount);
@@ -309,6 +319,7 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 			strcpy(label, "_if");
 			strcat(label, integerToString(auxiliar, ifCount, 10));
 
+			constant = -1;
 			strcpy(auxiliar, "");
 		}
 		else {
@@ -322,6 +333,7 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 				strcpy(label, "_if");
 				strcat(label, integerToString(auxiliar, ifCount, 10));
 
+				strcpy(identifier, "");
 				strcpy(auxiliar, "");
 			}
 			else {
@@ -336,6 +348,7 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 	}
 	else {
 		if(!strcmp(identifier, "")) {
+			printf("not implemented\n");fflush(stdout);
 			// TODO: comparison operation when the second operand is an constant
 		}
 		else {
@@ -344,15 +357,18 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 			if(i >= 0) {
 				fprintf(file, "\t -\t%s\n", identifier);
 				if(!strcmp(operator, "==")) {
+					printf("with equals\n");fflush(stdout);
 					fprintf(file, "\tJZ\t_if%d\n", ifCount);
 					fprintf(file, "\tJP\t_else%d\n", ifCount);
 				}
 				else if(!strcmp(operator, "<")) {
+					printf("with lower than\n");fflush(stdout);
 					fprintf(file, "\tJN\t_if%d\n", ifCount);
 					fprintf(file, "\tJP\t_else%d\n", ifCount);
 				}
 				else if(!strcmp(operator, ">")) {
-					fprintf(file, "\t *\t_inv%d\n", ifCount);
+					printf("with greater than\n");fflush(stdout);
+					fprintf(file, "\t *\t_inv\n");
 					fprintf(file, "\tJN\t_if%d\n", ifCount);
 					fprintf(file, "\tJP\t_else%d\n", ifCount);
 				}
@@ -361,6 +377,8 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 				strcpy(label, "_if");
 				strcat(label, integerToString(auxiliar, ifCount, 10));
 
+				strcpy(identifier, "");
+				strcpy(operator, "");
 				strcpy(auxiliar, "");
 			}
 			else {
@@ -476,9 +494,10 @@ void setOperator(FILE* file, DynamicTable* symbols, Token token) {
 void setAttribution(FILE* file, DynamicTable* symbols, Token token) {
 	int i;
 
-	printf("semantic: attribution\n");fflush(stdout);
+	printf("semantic: attribution ");fflush(stdout);
 
 	if(!strcmp(operator, "")) {
+		printf("with one operand\n");fflush(stdout);
 		if(!strcmp(identifier, "")) {
 			fprintf(file, "%s\tLV\t/%04X\n", label, constant);
 			fprintf(file, "\tMM\t%s\n", destination);
@@ -504,6 +523,7 @@ void setAttribution(FILE* file, DynamicTable* symbols, Token token) {
 	}
 	else {
 		if(!strcmp(identifier, "")) {
+			printf("not implemented\n");fflush(stdout);
 			// TODO: attribution operation when the second operand is an constant
 		}
 		else {
@@ -511,15 +531,19 @@ void setAttribution(FILE* file, DynamicTable* symbols, Token token) {
 
 			if(i >= 0) {
 				if(!strcmp(operator, "+")) {
+					printf("with add\n");fflush(stdout);
 					fprintf(file, "%s\t +\t%s\n", label, identifier);
 				}
 				else if(!strcmp(operator, "-")) {
+					printf("with sub\n");fflush(stdout);
 					fprintf(file, "%s\t -\t%s\n", label, identifier);
 				}
 				else if(!strcmp(operator, "*")) {
+					printf("with mult\n");fflush(stdout);
 					fprintf(file, "%s\t *\t%s\n", label, identifier);
 				}
 				else if(!strcmp(operator, "/")) {
+					printf("with div\n");fflush(stdout);
 					fprintf(file, "%s\t /\t%s\n", label, identifier);
 				}
 				fprintf(file, "\tMM\t%s\n", destination);
