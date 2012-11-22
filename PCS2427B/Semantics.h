@@ -44,6 +44,9 @@ void noElse(FILE* file, DynamicTable* symbols, Token token);
 void endElse(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LOOP ********/
+void setLoop(FILE* file, DynamicTable* symbols, Token token);
+void setIteration(FILE* file, DynamicTable* symbols, Token token);
+void endIteration(FILE* file, DynamicTable* symbols, Token token);
 
 /******** SUBROTINE CALL ********/
 

@@ -1,0 +1,99 @@
+import "library";
+
+var int variable0;
+var int variable1;
+var bool variable2;
+
+procedure void procedure0() {
+	variable1 = 12;
+	variable2 = 8 - variable1;
+	goto label0;
+	
+	/* var1 = 12, var2 = -4 */
+}
+
+procedure int procedure1(int param0, int param1) {
+	label0:
+	goto label4;
+	
+	label1:
+	goto label3;
+	
+	label4:
+	variable0 = variable1 + variable2;
+	goto label1;
+	goto label4;
+	
+	label3:
+	param0 = 20/variable0;
+	goto label2;
+	
+	label5:
+	goto label6;
+	
+	label2:
+	goto label5;
+	goto label2;
+	
+	label6:
+	param1 = variable0*variable0;
+	
+	/* var0 = 8, param0 = 2, param1 = 64 */
+}
+
+procedure bool procedure2(bool param2) {
+	param1 = param1/variable0;
+	
+	/* param1 = 8 */
+	if(param1) {
+		param1 = 256;
+	}
+	else {
+		param1 = 16;
+	}
+	
+	label7:
+	/* param0 = 2, param1 = 256 */
+	if(param0 > param1) {
+		param0 = 4096;
+	}
+	
+	/* param0 = 2, param1 = 256 */
+}
+
+procedure void procedure3(int param3, int param4) {
+	param3 = 12;
+	param4 = 1;
+	
+	/* param3 = 12 */
+	while(param3) {
+		param3 = param3 - param4;
+	}
+	
+	/* param3 = 1 */
+	if(0 == param3) {
+		param3 = 10;
+	}
+	else {
+		param3 = 7;
+	}
+	
+	/* param3 = 7, param4 = 1 */
+	while(param3 > param4) {
+		label8:
+		/* param3 > 0 */
+		if(param3) {
+			param3 = param3 - param4;
+		}
+	}
+	
+	/* param3 = 1, param4 = 1 */
+	if(param3 == param4) {
+		param3 = 1*param3;
+		while(0) {}
+	}
+	
+	/* var0 = 8, var1 = 12, var2 = -4, param0 = 2, param1 = 256, param3 = 1  */
+}
+
+end

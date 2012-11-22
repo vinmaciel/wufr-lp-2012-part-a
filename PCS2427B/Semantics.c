@@ -66,6 +66,12 @@ int getSemanticFunctionIndex(const char* label) {
 		return 14;
 	if(!strcmp(label, "endElse"))
 		return 15;
+	if(!strcmp(label, "setIteration"))
+		return 16;
+	if(!strcmp(label, "setLoop"))
+		return 17;
+	if(!strcmp(label, "endIteration"))
+		return 18;
 
 	return -1;
 }
@@ -111,6 +117,12 @@ semantic semanticFunction(int index) {
 		return noElse;
 	case 15:
 		return endElse;
+	case 16:
+		return setIteration;
+	case 17:
+		return setLoop;
+	case 18:
+		return endIteration;
 	}
 	return nil;
 }
@@ -151,7 +163,7 @@ void setType(FILE* file, DynamicTable* symbols, Token token) {
 // 3
 void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: EOB\n");fflush(stdout);
-	// allows end of conditional block label with NOP (instruction with no effect)
+	// allows end of conditional or iteration blocks label with NOP (instruction with no effect)
 	if(!strncmp(label, "_else", 5)) {
 		fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
 		strcpy(label, "_then");
@@ -163,12 +175,16 @@ void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 		fprintf(file, "%s\t +\t_nil\n", label);
 		strcpy(label, "");
 	}
+	if(!strncmp(label, "_finally", 8)) {
+		fprintf(file, "%s\t +\t_nil\n", label);
+		strcpy(label, "");
+	}
 	fflush(file);
 
 	// cannot end block with opened label
 	if(strcmp(label, "")) {
-		printf("ERROR: label at the end of compound statement.\n");
-		fprintf(file, "ERROR: label at the end of compound statement.\n");
+		printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
+		fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
 		fflush(stdout);
 		fflush(file);
 		system("PAUSE");
@@ -253,11 +269,22 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: label\n");fflush(stdout);
 	// if instruction already has a label, jump to the last assigned label
 	if(strcmp(label,"")) {
-		i = addToTable(symbols, identifier, "label");
-		defineRow(symbols, i);
-		fprintf(file, "%s\tJP\t%s\n", identifier, label);
-		fflush(file);
-		strcpy(identifier, "");
+		i = lookUpForCell(*symbols, identifier, "label");
+		if(i == -1) {
+			i = addToTable(symbols, identifier, "label");
+			defineRow(symbols, i);
+			fprintf(file, "%s\tJP\t%s\n", identifier, label);
+			fflush(file);
+			strcpy(identifier, "");
+		}
+		else {
+			printf("ERROR: duplicate label %s.\n", identifier);
+			fprintf(file, "ERROR: duplicate label %s.\n", identifier);
+			fflush(stdout);
+			fflush(file);
+			system("PAUSE");
+			exit(5);
+		}
 	}
 	// otherwise, add it to symbol table and activate it as current label
 	else {
@@ -394,18 +421,17 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 }
 // 13
 void endConditional(FILE* file, DynamicTable* symbols, Token token) {
-	if(!strcmp(label, "")) {
-		fprintf(file, "\tJP\t_then%d\n", ifCount);
-		fflush(file);
-	}
-	else {
-		printf("ERROR: label at the end of compound statement.\n");
-		fprintf(file, "ERROR: label at the end of compound statement.\n");
+	if(strcmp(label, "") && strncmp(label, "_finally", 8)) {
+		// allows end of iteration block label with NOP (instruction with no effect)
+		printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
+		fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
 		fflush(stdout);
 		fflush(file);
 		system("PAUSE");
 		exit(5);
 	}
+	fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+	fflush(file);
 
 	strcpy(label, "_else");
 	strcat(label, integerToString(auxiliar, ifCount, 10));
@@ -427,23 +453,164 @@ void noElse(FILE* file, DynamicTable* symbols, Token token) {
 }
 // 15
 void endElse(FILE* file, DynamicTable* symbols, Token token) {
-	if(!strcmp(label, "")) {
-		strcpy(label, "_then");
-		strcat(label, integerToString(auxiliar, ifCount, 10));
+	int flag = 0;
 
-		strcpy(auxiliar, "");
+	if(strcmp(label, "")) {
+		// allows end of iteration block label with NOP (instruction with no effect)
+		if(!strncmp(label, "_finally", 8)) {
+			flag++;
+			fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+			strcpy(label, "");
+			fflush(file);
+		}
+
+		if(!flag) {
+			printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
+			fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
+			fflush(stdout);
+			fflush(file);
+			system("PAUSE");
+			exit(5);
+		}
+	}
+
+	strcpy(label, "_then");
+	strcat(label, integerToString(auxiliar, ifCount, 10));
+
+	strcpy(auxiliar, "");
+}
+
+/******** LOOP ********/
+// 17
+void setLoop(FILE* file, DynamicTable* symbols, Token token) {
+	printf("semantic: loop\n");fflush(stdout);
+	whileCount++;
+
+	if(strcmp(label, "")) {
+		fprintf(file, "%s\tJP\t_while%d\n", label, whileCount);
+	}
+	strcpy(label, "_while");
+	strcat(label, integerToString(auxiliar, whileCount, 10));
+
+	strcpy(auxiliar, "");
+}
+// 16
+void setIteration(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	printf("semantic: iteration ");fflush(stdout);
+
+	if(!strcmp(operator, "")) {
+		printf("with one operand\n");fflush(stdout);
+		if(!strcmp(identifier, "")) {
+			fprintf(file, "%s\tLV\t/%04X\n", label, constant);
+			fprintf(file, "\tJZ\t_finally%d\n", whileCount);
+			fflush(file);
+
+			strcpy(label, "_do");
+			strcat(label, integerToString(auxiliar, whileCount, 10));
+
+			constant = -1;
+			strcpy(auxiliar, "");
+		}
+		else {
+			i = lookUpForCell(*symbols, identifier, "variable");
+
+			if(i >= 0) {
+				fprintf(file, "%s\tLD\t%s\n", label, identifier);
+				fprintf(file, "\tJZ\t_finally%d\n", whileCount);
+				fflush(file);
+
+				strcpy(label, "_do");
+				strcat(label, integerToString(auxiliar, ifCount, 10));
+
+				strcpy(identifier, "");
+				strcpy(auxiliar, "");
+			}
+			else {
+				printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fflush(stdout);
+				fflush(file);
+				system("PAUSE");
+				exit(5);
+			}
+		}
 	}
 	else {
-		printf("ERROR: label at the end of compound statement.\n");
-		fprintf(file, "ERROR: label at the end of compound statement.\n");
+		if(!strcmp(identifier, "")) {
+			printf("not implemented\n");fflush(stdout);
+			// TODO: comparison operation when the second operand is an constant
+		}
+		else {
+			i = lookUpForCell(*symbols, identifier, "variable");
+
+			if(i >= 0) {
+				fprintf(file, "\t -\t%s\n", identifier);
+				if(!strcmp(operator, "==")) {
+					printf("with equals\n");fflush(stdout);
+					fprintf(file, "\tJZ\t_do%d\n", whileCount);
+					fprintf(file, "\tJP\t_finally%d\n", whileCount);
+				}
+				else if(!strcmp(operator, "<")) {
+					printf("with lower than\n");fflush(stdout);
+					fprintf(file, "\tJN\t_do%d\n", whileCount);
+					fprintf(file, "\tJP\t_finally%d\n", whileCount);
+				}
+				else if(!strcmp(operator, ">")) {
+					printf("with greater than\n");fflush(stdout);
+					fprintf(file, "\t *\t_inv\n");
+					fprintf(file, "\tJN\t_do%d\n", whileCount);
+					fprintf(file, "\tJP\t_finally%d\n", whileCount);
+				}
+				fflush(file);
+
+				strcpy(label, "_do");
+				strcat(label, integerToString(auxiliar, whileCount, 10));
+
+				strcpy(identifier, "");
+				strcpy(operator, "");
+				strcpy(auxiliar, "");
+			}
+			else {
+				printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+				fflush(stdout);
+				fflush(file);
+				system("PAUSE");
+				exit(5);
+			}
+		}
+	}
+}
+// 18
+void endIteration(FILE* file, DynamicTable* symbols, Token token) {
+	if(strcmp(label, "") && strncmp(label, "_do", 3) && strncmp(label, "_else", 5) && strncmp(label, "_then", 5)) {
+		// allows end of conditional block label with NOP (instruction with no effect)
+		printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
+		fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
 		fflush(stdout);
 		fflush(file);
 		system("PAUSE");
 		exit(5);
 	}
-}
 
-/******** LOOP ********/
+	if(!strncmp(label, "_else", 5)) {
+		fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+		strcpy(label, "_then");
+		strcat(label, integerToString(auxiliar, ifCount, 10));
+
+		strcpy(auxiliar, "");
+	}
+
+	fprintf(file, "%s\tJP\t_while%d\n", label, whileCount);
+	fflush(file);
+
+	strcpy(label, "_finally");
+	strcat(label, integerToString(auxiliar, whileCount, 10));
+
+	strcpy(auxiliar, "");
+}
 
 /******** SUBROTINE CALL ********/
 

@@ -1,5 +1,5 @@
-24
-'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'if1' 'if2' 'if3' 'if4' 'if5' 'if6' 'if7' 'if8' 'if9' 'if10' 'if11' 'if12' '*endif' 'while0' 'id0' 'id1' 'id2' 'id3' 'id4'
+29
+'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'if1' 'if2' 'if3' 'if4' 'if5' 'if6' 'if7' 'if8' 'if9' 'if10' '*endif' 'while0' 'while1' 'while2' 'while3' 'while4' 'while5' 'while6' 'while7' 'id0' 'id1' 'id2' 'id3' 'id4'
 22
 'DO' 'GOTO' 'IF' 'ELSE' 'WHILE' 'IDENTIFIER' 'CONSTANT' ';' ':' '=' '+' '-' '*' '/' '>' '<' '==' '(' ')' '{' '}' '<sentence>'
 
@@ -36,6 +36,20 @@
 'if10'			'}'				'*inicial'		'endElse'
 
 '*inicial'		'WHILE'			'while0'		'nil'
+'while0'		'('				'while1'		'setLoop'
+'while1'		'IDENTIFIER'	'while2'		'setIdentifier'
+'while1'		'CONSTANT'		'while2'		'setConstant'
+'while2'		')'				'while5'		'setIteration'
+'while2'		'<'				'while3'		'setOperator'
+'while2'		'>'				'while3'		'setOperator'
+'while2'		'=='			'while3'		'setOperator'
+'while3'		'IDENTIFIER'	'while4'		'setIdentifier'
+'while3'		'CONSTANT'		'while4'		'setConstant'
+'while4'		')'				'while5'		'setIteration'
+'while5'		'{'				'while6'		'nil'
+'while6'		'<sentence>'	'while7'		'nil'
+'while7'		'}'				'*inicial'		'endIteration'
+
 
 '*inicial'		'IDENTIFIER'	'id0'			'setIdentifier'
 'id0'			':'				'*inicial'		'setLabel'
