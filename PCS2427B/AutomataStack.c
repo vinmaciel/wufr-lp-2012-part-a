@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "AutomataStack.h"
 
-void newFreeList(void) {
+void newAutomataFreeList(void) {
 	freeList = NULL;
 }
 
@@ -29,8 +29,10 @@ void cleanAutomataStack(AutomataStack* stack) {
 }
 
 void getNewStackNode(AutomataStack* newNode) {
-	if(freeList == NULL)
+	if(freeList == NULL) {
+		printf("empty\n");fflush(stdout);
 		*newNode = (AutomataStackNode*) malloc(sizeof(AutomataStackNode));
+	}
 	else {
 		*newNode = freeList;
 		freeList = freeList->next;
