@@ -20,7 +20,7 @@ typedef AutomataStackNode* AutomataStack;
 
 AutomataStack freeList;
 
-void newFreeList(void);
+void newAutomataFreeList(void);
 void newAutomataStack(AutomataStack* stack);
 void cleanAutomataStack(AutomataStack* stack);
 void getNewStackNode(AutomataStack* newNode);

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "Semantics.h"
+#include "Stack.h"
 #include "Token.h"
 #include "Table.h"
 
@@ -19,11 +20,30 @@ char label[64];
 char type[5];
 char destination[64];
 char operator[2];
+Stack ifs;
 int ifCount;
+Stack whiles;
 int whileCount;
 
 char auxiliar[64];
 /************************************/
+
+void cleanSemanticParameters() {
+	strcpy(identifier, "");
+	strcpy(label, "");
+	strcpy(type, "");
+	strcpy(destination, "");
+	strcpy(operator, "");
+	strcpy(auxiliar, "");
+
+	constant = -1;
+	ifCount = -1;
+	whileCount = -1;
+
+	newFreeList();
+	newStack(&ifs);
+	newStack(&whiles);
+}
 
 /**
  * Retrieves the index associated to the semantic action.
@@ -127,19 +147,6 @@ semantic semanticFunction(int index) {
 	return nil;
 }
 
-void cleanSemanticParameters() {
-	strcpy(identifier, "");
-	strcpy(label, "");
-	strcpy(type, "");
-	strcpy(destination, "");
-	strcpy(operator, "");
-	strcpy(auxiliar, "");
-
-	constant = -1;
-	ifCount = -1;
-	whileCount = 0;
-}
-
 /******** GENERAL ********/
 // 0
 void nil(FILE* file, DynamicTable* symbols, Token token) {
@@ -165,9 +172,9 @@ void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: EOB\n");fflush(stdout);
 	// allows end of conditional or iteration blocks label with NOP (instruction with no effect)
 	if(!strncmp(label, "_else", 5)) {
-		fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+		fprintf(file, "%s\tJP\t_then%d\n", label, top(ifs));
 		strcpy(label, "_then");
-		strcat(label, integerToString(auxiliar, ifCount, 10));
+		strcat(label, integerToString(auxiliar, pop(&ifs), 10));
 
 		strcpy(auxiliar, "");
 	}
@@ -335,16 +342,17 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 
 	printf("semantic: conditional ");fflush(stdout);
 	ifCount++;
+	push(&ifs, ifCount);
 
 	if(!strcmp(operator, "")) {
 		printf("with one operand\n");fflush(stdout);
 		if(!strcmp(identifier, "")) {
 			fprintf(file, "%s\tLV\t/%04X\n", label, constant);
-			fprintf(file, "\tJZ\t_else%d\n", ifCount);
+			fprintf(file, "\tJZ\t_else%d\n", top(ifs));
 			fflush(file);
 
 			strcpy(label, "_if");
-			strcat(label, integerToString(auxiliar, ifCount, 10));
+			strcat(label, integerToString(auxiliar, top(ifs), 10));
 
 			constant = -1;
 			strcpy(auxiliar, "");
@@ -354,11 +362,11 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 
 			if(i >= 0) {
 				fprintf(file, "%s\tLD\t%s\n", label, identifier);
-				fprintf(file, "\tJZ\t_else%d\n", ifCount);
+				fprintf(file, "\tJZ\t_else%d\n", top(ifs));
 				fflush(file);
 
 				strcpy(label, "_if");
-				strcat(label, integerToString(auxiliar, ifCount, 10));
+				strcat(label, integerToString(auxiliar, top(ifs), 10));
 
 				strcpy(identifier, "");
 				strcpy(auxiliar, "");
@@ -385,24 +393,24 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 				fprintf(file, "\t -\t%s\n", identifier);
 				if(!strcmp(operator, "==")) {
 					printf("with equals\n");fflush(stdout);
-					fprintf(file, "\tJZ\t_if%d\n", ifCount);
-					fprintf(file, "\tJP\t_else%d\n", ifCount);
+					fprintf(file, "\tJZ\t_if%d\n", top(ifs));
+					fprintf(file, "\tJP\t_else%d\n", top(ifs));
 				}
 				else if(!strcmp(operator, "<")) {
 					printf("with lower than\n");fflush(stdout);
-					fprintf(file, "\tJN\t_if%d\n", ifCount);
-					fprintf(file, "\tJP\t_else%d\n", ifCount);
+					fprintf(file, "\tJN\t_if%d\n", top(ifs));
+					fprintf(file, "\tJP\t_else%d\n", top(ifs));
 				}
 				else if(!strcmp(operator, ">")) {
 					printf("with greater than\n");fflush(stdout);
 					fprintf(file, "\t *\t_inv\n");
-					fprintf(file, "\tJN\t_if%d\n", ifCount);
-					fprintf(file, "\tJP\t_else%d\n", ifCount);
+					fprintf(file, "\tJN\t_if%d\n", top(ifs));
+					fprintf(file, "\tJP\t_else%d\n", top(ifs));
 				}
 				fflush(file);
 
 				strcpy(label, "_if");
-				strcat(label, integerToString(auxiliar, ifCount, 10));
+				strcat(label, integerToString(auxiliar, top(ifs), 10));
 
 				strcpy(identifier, "");
 				strcpy(operator, "");
@@ -421,7 +429,18 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 }
 // 13
 void endConditional(FILE* file, DynamicTable* symbols, Token token) {
-	if(strcmp(label, "") && strncmp(label, "_finally", 8)) {
+	printf("semantic: EOC\n");fflush(stdout);
+	// allows end of conditional or iteration blocks label with NOP (instruction with no effect)
+	if(!strncmp(label, "_else", 5)) {
+		fprintf(file, "%s\tJP\t_then%d\n", label, top(ifs));
+		strcpy(label, "_then");
+		strcat(label, integerToString(auxiliar, pop(&ifs), 10));
+
+		strcpy(auxiliar, "");
+	}
+	fflush(file);
+
+	if(strcmp(label, "") && strncmp(label, "_then", 5) && strncmp(label, "_finally", 8)) {
 		// allows end of iteration block label with NOP (instruction with no effect)
 		printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
 		fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
@@ -430,21 +449,21 @@ void endConditional(FILE* file, DynamicTable* symbols, Token token) {
 		system("PAUSE");
 		exit(5);
 	}
-	fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+	fprintf(file, "%s\tJP\t_then%d\n", label, top(ifs));
 	fflush(file);
 
 	strcpy(label, "_else");
-	strcat(label, integerToString(auxiliar, ifCount, 10));
+	strcat(label, integerToString(auxiliar, top(ifs), 10));
 
 	strcpy(auxiliar, "");
 }
 // 14
 void noElse(FILE* file, DynamicTable* symbols, Token token) {
-	fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
+	fprintf(file, "%s\tJP\t_then%d\n", label, top(ifs));
 	fflush(file);
 
 	strcpy(label, "_then");
-	strcat(label, integerToString(auxiliar, ifCount, 10));
+	strcat(label, integerToString(auxiliar, pop(&ifs), 10));
 
 	strcpy(auxiliar, "");
 
@@ -453,29 +472,29 @@ void noElse(FILE* file, DynamicTable* symbols, Token token) {
 }
 // 15
 void endElse(FILE* file, DynamicTable* symbols, Token token) {
-	int flag = 0;
+	printf("semantic: EOE\n");fflush(stdout);
+	// allows end of conditional or iteration blocks label with NOP (instruction with no effect)
+	if(!strncmp(label, "_else", 5)) {
+		fprintf(file, "%s\tJP\t_then%d\n", label, top(ifs));
+		strcpy(label, "_then");
+		strcat(label, integerToString(auxiliar, pop(&ifs), 10));
 
-	if(strcmp(label, "")) {
-		// allows end of iteration block label with NOP (instruction with no effect)
-		if(!strncmp(label, "_finally", 8)) {
-			flag++;
-			fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
-			strcpy(label, "");
-			fflush(file);
-		}
+		strcpy(auxiliar, "");
+	}
+	fflush(file);
 
-		if(!flag) {
-			printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
-			fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
-			fflush(stdout);
-			fflush(file);
-			system("PAUSE");
-			exit(5);
-		}
+	if(strcmp(label, "") && strncmp(label, "_then", 5) && strncmp(label, "_finally", 8)) {
+		printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
+		fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
 	}
 
+	fprintf(file, "%s\tJP\t_then%d\n", label, top(ifs));
 	strcpy(label, "_then");
-	strcat(label, integerToString(auxiliar, ifCount, 10));
+	strcat(label, integerToString(auxiliar, pop(&ifs), 10));
 
 	strcpy(auxiliar, "");
 }
@@ -485,12 +504,13 @@ void endElse(FILE* file, DynamicTable* symbols, Token token) {
 void setLoop(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: loop\n");fflush(stdout);
 	whileCount++;
+	push(&whiles, whileCount);
 
 	if(strcmp(label, "")) {
-		fprintf(file, "%s\tJP\t_while%d\n", label, whileCount);
+		fprintf(file, "%s\tJP\t_while%d\n", label, top(whiles));
 	}
 	strcpy(label, "_while");
-	strcat(label, integerToString(auxiliar, whileCount, 10));
+	strcat(label, integerToString(auxiliar, top(whiles), 10));
 
 	strcpy(auxiliar, "");
 }
@@ -504,11 +524,11 @@ void setIteration(FILE* file, DynamicTable* symbols, Token token) {
 		printf("with one operand\n");fflush(stdout);
 		if(!strcmp(identifier, "")) {
 			fprintf(file, "%s\tLV\t/%04X\n", label, constant);
-			fprintf(file, "\tJZ\t_finally%d\n", whileCount);
+			fprintf(file, "\tJZ\t_finally%d\n", top(whiles));
 			fflush(file);
 
 			strcpy(label, "_do");
-			strcat(label, integerToString(auxiliar, whileCount, 10));
+			strcat(label, integerToString(auxiliar, top(whiles), 10));
 
 			constant = -1;
 			strcpy(auxiliar, "");
@@ -518,11 +538,11 @@ void setIteration(FILE* file, DynamicTable* symbols, Token token) {
 
 			if(i >= 0) {
 				fprintf(file, "%s\tLD\t%s\n", label, identifier);
-				fprintf(file, "\tJZ\t_finally%d\n", whileCount);
+				fprintf(file, "\tJZ\t_finally%d\n", top(whiles));
 				fflush(file);
 
 				strcpy(label, "_do");
-				strcat(label, integerToString(auxiliar, ifCount, 10));
+				strcat(label, integerToString(auxiliar, top(whiles), 10));
 
 				strcpy(identifier, "");
 				strcpy(auxiliar, "");
@@ -549,24 +569,24 @@ void setIteration(FILE* file, DynamicTable* symbols, Token token) {
 				fprintf(file, "\t -\t%s\n", identifier);
 				if(!strcmp(operator, "==")) {
 					printf("with equals\n");fflush(stdout);
-					fprintf(file, "\tJZ\t_do%d\n", whileCount);
-					fprintf(file, "\tJP\t_finally%d\n", whileCount);
+					fprintf(file, "\tJZ\t_do%d\n", top(whiles));
+					fprintf(file, "\tJP\t_finally%d\n", top(whiles));
 				}
 				else if(!strcmp(operator, "<")) {
 					printf("with lower than\n");fflush(stdout);
-					fprintf(file, "\tJN\t_do%d\n", whileCount);
-					fprintf(file, "\tJP\t_finally%d\n", whileCount);
+					fprintf(file, "\tJN\t_do%d\n", top(whiles));
+					fprintf(file, "\tJP\t_finally%d\n", top(whiles));
 				}
 				else if(!strcmp(operator, ">")) {
 					printf("with greater than\n");fflush(stdout);
 					fprintf(file, "\t *\t_inv\n");
-					fprintf(file, "\tJN\t_do%d\n", whileCount);
-					fprintf(file, "\tJP\t_finally%d\n", whileCount);
+					fprintf(file, "\tJN\t_do%d\n", top(whiles));
+					fprintf(file, "\tJP\t_finally%d\n", top(whiles));
 				}
 				fflush(file);
 
 				strcpy(label, "_do");
-				strcat(label, integerToString(auxiliar, whileCount, 10));
+				strcat(label, integerToString(auxiliar, top(whiles), 10));
 
 				strcpy(identifier, "");
 				strcpy(operator, "");
@@ -585,8 +605,19 @@ void setIteration(FILE* file, DynamicTable* symbols, Token token) {
 }
 // 18
 void endIteration(FILE* file, DynamicTable* symbols, Token token) {
-	if(strcmp(label, "") && strncmp(label, "_do", 3) && strncmp(label, "_else", 5) && strncmp(label, "_then", 5)) {
-		// allows end of conditional block label with NOP (instruction with no effect)
+	printf("semantic: EOI\n");fflush(stdout);
+	// allows end of conditional or iteration blocks label with NOP (instruction with no effect)
+	if(!strncmp(label, "_else", 5)) {
+		fprintf(file, "%s\tJP\t_then%d\n", label, top(ifs));
+		strcpy(label, "_then");
+		strcat(label, integerToString(auxiliar, pop(&ifs), 10));
+
+		strcpy(auxiliar, "");
+	}
+	fflush(file);
+
+	// cannot end block with opened label
+	if(strcmp(label, "") && strncmp(label, "_then", 5) && strncmp(label, "_do", 3) && strncmp(label, "_finally", 8)) {
 		printf("ERROR: label \"%s\" at the end of compound statement.\n", label);
 		fprintf(file, "ERROR: label \"%s\" at the end of compound statement.\n", label);
 		fflush(stdout);
@@ -595,19 +626,11 @@ void endIteration(FILE* file, DynamicTable* symbols, Token token) {
 		exit(5);
 	}
 
-	if(!strncmp(label, "_else", 5)) {
-		fprintf(file, "%s\tJP\t_then%d\n", label, ifCount);
-		strcpy(label, "_then");
-		strcat(label, integerToString(auxiliar, ifCount, 10));
-
-		strcpy(auxiliar, "");
-	}
-
-	fprintf(file, "%s\tJP\t_while%d\n", label, whileCount);
+	fprintf(file, "%s\tJP\t_while%d\n", label, top(whiles));
 	fflush(file);
 
 	strcpy(label, "_finally");
-	strcat(label, integerToString(auxiliar, whileCount, 10));
+	strcat(label, integerToString(auxiliar, pop(&whiles), 10));
 
 	strcpy(auxiliar, "");
 }

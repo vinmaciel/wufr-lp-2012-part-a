@@ -23,7 +23,7 @@ void createMachine(FILE* input, Machine* machine) {
 	FILE *automatonFile;
 
 	/* create free list */
-	newFreeList();
+	newAutomataFreeList();
 
 	*machine = (MachineStruct*) malloc(sizeof(MachineStruct));
 
