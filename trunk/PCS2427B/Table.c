@@ -124,11 +124,12 @@ void createDynamicTable(DynamicTable* table) {
  *
  * @param table to be inserted into.
  * @param name to be inserted.
+ * @param nick to be inserted.
  * @param class of the row.
  *
  * @return the index of the added row, or the index of the existing row (if it already exists).
  */
-int addToTable(DynamicTable* table, const char* name, const char* class) {
+int addToTable(DynamicTable* table, const char* name, const char* nick, const char* class) {
 	DynamicTable newCell, search;
 	int index;
 
@@ -138,9 +139,11 @@ int addToTable(DynamicTable* table, const char* name, const char* class) {
 		newCell = (DynamicTableNode*) malloc(sizeof(DynamicTableNode));
 
 		newCell->name = (char*) malloc((strlen(name)+1)*sizeof(char));
+		newCell->nick = (char*) malloc((strlen(nick)+1)*sizeof(char));
 		newCell->class = (char*) malloc((strlen(class)+1)*sizeof(char));
 		newCell->defined = 0;
 		strcpy(newCell->name, name);
+		strcpy(newCell->nick, nick);
 		strcpy(newCell->class, class);
 
 		newCell->next = NULL;

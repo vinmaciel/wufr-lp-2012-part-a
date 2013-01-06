@@ -24,6 +24,7 @@ char operator[2];
 Stack ifs;
 int ifCount;
 Stack whiles;
+int params;
 int whileCount;
 
 char auxiliar[64];
@@ -41,13 +42,14 @@ void startSemantics(FILE* file, DynamicTable* symbols) {
 	constant = -1;
 	ifCount = -1;
 	whileCount = -1;
+	params = 0;
 
 	newFreeList();
 	newStack(&ifs);
 	newStack(&whiles);
 
 	fprintf(file, "_start\tSC\tmain\n\tHM\t_start\n\n");
-	addToTable(symbols, "main", "procedure");
+	addToTable(symbols, "main", "main", "procedure");
 }
 
 /**
@@ -101,6 +103,10 @@ int getSemanticFunctionIndex(const char* label) {
 		return 19;
 	if(!strcmp(label, "setProcedure"))
 		return 20;
+	if(!strcmp(label, "setParam"))
+		return 21;
+	if(!strcmp(label, "clearParams"))
+		return 22;
 
 	return -1;
 }
@@ -156,6 +162,10 @@ semantic semanticFunction(int index) {
 		return setLink;
 	case 20:
 		return setProcedure;
+	case 21:
+		return setParam;
+	case 22:
+		return clearParams;
 	}
 	return nil;
 }
@@ -249,7 +259,7 @@ void endFile(FILE* file, DynamicTable* symbols, Token token) {
 
 	// the end of the file must contain the data allocation
 	for(search = *symbols; search != NULL; search = search->next) {
-		if(!strcmp(search->class, "variable")) {
+		if(!strcmp(search->class, "variable") && strncmp(search->nick, "_param", 6)) {
 			fprintf(file, "%s\t K\t/0000\n", search->name);
 			fflush(file);
 		}
@@ -275,7 +285,7 @@ void setVar(FILE* file, DynamicTable* symbols, Token token) {
 	i = lookUpForCell(*symbols, identifier, "variable");
 
 	if(i == -1) {
-		i = addToTable(symbols, identifier, "variable");
+		i = addToTable(symbols, identifier, identifier, "variable");
 		defineRow(symbols, i);
 		strcpy(identifier, "");
 		strcpy(type, "");
@@ -303,7 +313,7 @@ void setLink(FILE* file, DynamicTable* symbols, Token token) {
 	// TODO: procedures and variables still cannot have the same name
 	i = lookUpForCell(*symbols, procedure, "procedure");
 	if(i == -1) {
-		i = addToTable(symbols, procedure, "procedure");
+		i = addToTable(symbols, procedure, procedure, "procedure");
 		defineRow(symbols, i);
 		fprintf(file, "%s\t K\t/0000\n", procedure);
 		fflush(file);
@@ -321,6 +331,41 @@ void setLink(FILE* file, DynamicTable* symbols, Token token) {
 		exit(5);
 	}
 }
+// 22
+void clearParams(FILE* file, DynamicTable* symbols, Token token) {
+	params = 0;
+}
+// 21
+void setParam(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+	char nick[128];
+
+	printf("semantic: param\n");fflush(stdout);
+	i = lookUpForCell(*symbols, identifier, "variable");
+
+	if(i == -1) {
+		strcpy(nick, "_param");
+		strcat(nick, integerToString(auxiliar, params++, 10));
+		strcat(nick, "_");
+		strcat(nick, procedure);
+		i = addToTable(symbols, identifier, nick, "variable");
+		defineRow(symbols, i);
+		strcpy(identifier, "");
+		strcpy(auxiliar, "");
+		strcpy(type, "");
+
+		fprintf(file, "%s\t K\t/0000\n", nick);
+		fflush(file);
+	}
+	else {
+		printf("ERROR: redeclaration of \"%s\".\n", identifier);
+		fprintf(file, "ERROR: redeclaration of \"%s\".\n", identifier);
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
+	}
+}
 
 /******** LABEL ********/
 // 2
@@ -332,7 +377,7 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token) {
 	if(strcmp(label,"")) {
 		i = lookUpForCell(*symbols, identifier, "label");
 		if(i == -1) {
-			i = addToTable(symbols, identifier, "label");
+			i = addToTable(symbols, identifier, identifier, "label");
 			defineRow(symbols, i);
 			fprintf(file, "%s\tJP\t%s\n", identifier, label);
 			fflush(file);
@@ -353,7 +398,7 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token) {
 		if(i == -1) {
 			strcpy(label, identifier);
 			strcpy(identifier, "");
-			i = addToTable(symbols, label, "label");
+			i = addToTable(symbols, label, label, "label");
 			defineRow(symbols, i);
 		}
 		else {
@@ -379,7 +424,7 @@ void setLabel(FILE* file, DynamicTable* symbols, Token token) {
 void setJump(FILE* file, DynamicTable* symbols, Token token) {
 	printf("semantic: jump\n");fflush(stdout);
 	if(lookUpForCell(*symbols, identifier, "label") == -1) {
-		addToTable(symbols, identifier, "label");
+		addToTable(symbols, identifier, identifier, "label");
 	}
 
 	fprintf(file, "%s\tJP\t%s\n", label, identifier);
@@ -415,7 +460,7 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 			i = lookUpForCell(*symbols, identifier, "variable");
 
 			if(i >= 0) {
-				fprintf(file, "%s\tLD\t%s\n", label, identifier);
+				fprintf(file, "%s\tLD\t%s\n", label, getRow(*symbols, i)->nick);
 				fprintf(file, "\tJZ\t_else%d\n", top(ifs));
 				fflush(file);
 
@@ -444,7 +489,7 @@ void setConditional(FILE* file, DynamicTable* symbols, Token token) {
 			i = lookUpForCell(*symbols, identifier, "variable");
 
 			if(i >= 0) {
-				fprintf(file, "\t -\t%s\n", identifier);
+				fprintf(file, "\t -\t%s\n", getRow(*symbols, i)->nick);
 				if(!strcmp(operator, "==")) {
 					printf("with equals\n");fflush(stdout);
 					fprintf(file, "\tJZ\t_if%d\n", top(ifs));
@@ -591,7 +636,7 @@ void setIteration(FILE* file, DynamicTable* symbols, Token token) {
 			i = lookUpForCell(*symbols, identifier, "variable");
 
 			if(i >= 0) {
-				fprintf(file, "%s\tLD\t%s\n", label, identifier);
+				fprintf(file, "%s\tLD\t%s\n", label, getRow(*symbols, i)->nick);
 				fprintf(file, "\tJZ\t_finally%d\n", top(whiles));
 				fflush(file);
 
@@ -620,7 +665,7 @@ void setIteration(FILE* file, DynamicTable* symbols, Token token) {
 			i = lookUpForCell(*symbols, identifier, "variable");
 
 			if(i >= 0) {
-				fprintf(file, "\t -\t%s\n", identifier);
+				fprintf(file, "\t -\t%s\n", getRow(*symbols, i)->nick);
 				if(!strcmp(operator, "==")) {
 					printf("with equals\n");fflush(stdout);
 					fprintf(file, "\tJZ\t_do%d\n", top(whiles));
@@ -700,7 +745,7 @@ void setDest(FILE* file, DynamicTable* symbols, Token token) {
 	i = lookUpForCell(*symbols, identifier, "variable");
 
 	if(i >= 0) {
-		strcpy(destination, identifier);
+		strcpy(destination, getRow(*symbols, i)->nick);
 		strcpy(identifier, "");
 	}
 	else {
@@ -727,7 +772,7 @@ void setOperator(FILE* file, DynamicTable* symbols, Token token) {
 		i = lookUpForCell(*symbols, identifier, "variable");
 
 		if(i >= 0) {
-			fprintf(file, "%s\tLD\t%s\n", label, identifier);
+			fprintf(file, "%s\tLD\t%s\n", label, getRow(*symbols, i)->nick);
 			strcpy(identifier, "");
 		}
 	}
@@ -751,7 +796,7 @@ void setAttribution(FILE* file, DynamicTable* symbols, Token token) {
 			i = lookUpForCell(*symbols, identifier, "variable");
 
 			if(i >= 0) {
-				fprintf(file, "%s\tLD\t%s\n", label, identifier);
+				fprintf(file, "%s\tLD\t%s\n", label, getRow(*symbols, i)->nick);
 				fprintf(file, "\tMM\t%s\n", destination);
 				fflush(file);
 			}
@@ -776,19 +821,19 @@ void setAttribution(FILE* file, DynamicTable* symbols, Token token) {
 			if(i >= 0) {
 				if(!strcmp(operator, "+")) {
 					printf("with add\n");fflush(stdout);
-					fprintf(file, "%s\t +\t%s\n", label, identifier);
+					fprintf(file, "%s\t +\t%s\n", label, getRow(*symbols, i)->nick);
 				}
 				else if(!strcmp(operator, "-")) {
 					printf("with sub\n");fflush(stdout);
-					fprintf(file, "%s\t -\t%s\n", label, identifier);
+					fprintf(file, "%s\t -\t%s\n", label, getRow(*symbols, i)->nick);
 				}
 				else if(!strcmp(operator, "*")) {
 					printf("with mult\n");fflush(stdout);
-					fprintf(file, "%s\t *\t%s\n", label, identifier);
+					fprintf(file, "%s\t *\t%s\n", label, getRow(*symbols, i)->nick);
 				}
 				else if(!strcmp(operator, "/")) {
 					printf("with div\n");fflush(stdout);
-					fprintf(file, "%s\t /\t%s\n", label, identifier);
+					fprintf(file, "%s\t /\t%s\n", label, getRow(*symbols, i)->nick);
 				}
 				fprintf(file, "\tMM\t%s\n", destination);
 				fflush(file);

@@ -33,6 +33,8 @@ void setVar(FILE* file, DynamicTable* symbols, Token token);
 /******** PROCEDURE ********/
 void setProcedure(FILE* file, DynamicTable* symbols, Token token);
 void setLink(FILE* file, DynamicTable* symbols, Token token);
+void clearParams(FILE* file, DynamicTable* symbols, Token token);
+void setParam(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LABEL ********/
 void setLabel(FILE* file, DynamicTable* symbols, Token token);
