@@ -1,4 +1,4 @@
-12
+13
 'bool'
 'do'
 'else'
@@ -7,6 +7,7 @@
 'if'
 'import'
 'int'
+'return'
 'procedure'
 'var'
 'void'

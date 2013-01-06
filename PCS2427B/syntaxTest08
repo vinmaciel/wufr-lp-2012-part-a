@@ -38,6 +38,7 @@ procedure int procedure1(int param0, int param1) {
 	label6:
 	param1 = variable0*variable0;
 	
+	return param0;
 	/* var0 = 8, param0 = 2, param1 = 64 */
 }
 
@@ -50,6 +51,7 @@ procedure bool procedure2(bool param2) {
 	}
 	else {
 		param1 = 16;
+		return 0;
 	}
 	
 	label7:
@@ -58,6 +60,7 @@ procedure bool procedure2(bool param2) {
 		param0 = 4096;
 	}
 	
+	return 1;
 	/* param0 = 2, param1 = 256 */
 }
 
@@ -73,6 +76,7 @@ procedure void procedure3(int param3, int param4) {
 	/* param3 = 1 */
 	if(0 == param3) {
 		param3 = 10;
+		return;
 	}
 	else {
 		param3 = 7;
@@ -97,6 +101,7 @@ procedure void procedure3(int param3, int param4) {
 		}
 	}
 	
+	return;
 	/* var0 = 8, var1 = 12, var2 = -4, param0 = 2, param1 = 256, param3 = 1  */
 }
 

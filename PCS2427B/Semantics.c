@@ -107,6 +107,10 @@ int getSemanticFunctionIndex(const char* label) {
 		return 21;
 	if(!strcmp(label, "clearParams"))
 		return 22;
+	if(!strcmp(label, "setReturn"))
+		return 23;
+	if(!strcmp(label, "setReturn2"))
+		return 24;
 
 	return -1;
 }
@@ -166,6 +170,10 @@ semantic semanticFunction(int index) {
 		return setParam;
 	case 22:
 		return clearParams;
+	case 23:
+		return setReturn;
+	case 24:
+		return setReturn2;
 	}
 	return nil;
 }
@@ -220,6 +228,8 @@ void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 		system("PAUSE");
 		exit(5);
 	}
+
+	strcpy(procedure, "");
 
 	fprintf(file, "\n");
 }
@@ -317,7 +327,6 @@ void setLink(FILE* file, DynamicTable* symbols, Token token) {
 		defineRow(symbols, i);
 		fprintf(file, "%s\t K\t/0000\n", procedure);
 		fflush(file);
-		strcpy(procedure, "");
 	}
 	else if(!strcmp(procedure, "main") && !getRow(*symbols, i)->defined) {
 		defineRow(symbols, i);
@@ -735,6 +744,40 @@ void endIteration(FILE* file, DynamicTable* symbols, Token token) {
 }
 
 /******** SUBROTINE CALL ********/
+// 23
+void setReturn(FILE* file, DynamicTable* symbols, Token token) {
+	fprintf(file, "%s\tRS\t%s\n", label, procedure);
+	strcpy(label, "");
+}
+// 24
+void setReturn2(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	if(!strcmp(identifier, "")) {
+		fprintf(file, "%s\tLV\t/%04X\n", label, constant);
+		constant = -1;
+	}
+	else {
+		i = lookUpForCell(*symbols, identifier, "variable");
+
+		if(i >= 0) {
+			fprintf(file, "%s\tLD\t%s\n", label, getRow(*symbols, i)->nick);
+			strcpy(identifier, "");
+		}
+		else {
+			printf("ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+			fprintf(file, "ERROR: symbol \"%s\" could not be resolved.\n", identifier);
+			fflush(stdout);
+			fflush(file);
+			system("PAUSE");
+			exit(5);
+		}
+	}
+
+	strcpy(label, "");
+	fprintf(file, "\tRS\t%s\n", procedure);
+	fflush(file);
+}
 
 /******** ATTRIBUTION ********/
 // 9

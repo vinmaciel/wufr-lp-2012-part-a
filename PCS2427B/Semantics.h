@@ -54,6 +54,8 @@ void setIteration(FILE* file, DynamicTable* symbols, Token token);
 void endIteration(FILE* file, DynamicTable* symbols, Token token);
 
 /******** SUBROTINE CALL ********/
+void setReturn(FILE* file, DynamicTable* symbols, Token token);
+void setReturn2(FILE* file, DynamicTable* symbols, Token token);
 
 /******** ATTRIBUTION ********/
 void setDest(FILE* file, DynamicTable* symbols, Token token);
