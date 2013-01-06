@@ -16,6 +16,7 @@
 /******** PRIVATE PARAMETERS ********/
 char identifier[64];
 int constant;
+char procedure[64];
 char label[64];
 char type[5];
 char destination[64];
@@ -28,9 +29,10 @@ int whileCount;
 char auxiliar[64];
 /************************************/
 
-void cleanSemanticParameters() {
+void startSemantics(FILE* file, DynamicTable* symbols) {
 	strcpy(identifier, "");
 	strcpy(label, "");
+	strcpy(procedure, "");
 	strcpy(type, "");
 	strcpy(destination, "");
 	strcpy(operator, "");
@@ -43,6 +45,9 @@ void cleanSemanticParameters() {
 	newFreeList();
 	newStack(&ifs);
 	newStack(&whiles);
+
+	fprintf(file, "_start\tSC\tmain\n\tHM\t_start\n\n");
+	addToTable(symbols, "main", "procedure");
 }
 
 /**
@@ -92,6 +97,10 @@ int getSemanticFunctionIndex(const char* label) {
 		return 17;
 	if(!strcmp(label, "endIteration"))
 		return 18;
+	if(!strcmp(label, "setLink"))
+		return 19;
+	if(!strcmp(label, "setProcedure"))
+		return 20;
 
 	return -1;
 }
@@ -143,6 +152,10 @@ semantic semanticFunction(int index) {
 		return setLoop;
 	case 18:
 		return endIteration;
+	case 19:
+		return setLink;
+	case 20:
+		return setProcedure;
 	}
 	return nil;
 }
@@ -197,22 +210,32 @@ void endBlock(FILE* file, DynamicTable* symbols, Token token) {
 		system("PAUSE");
 		exit(5);
 	}
+
+	fprintf(file, "\n");
 }
 // 5
 void endFile(FILE* file, DynamicTable* symbols, Token token) {
 	DynamicTable search;
 	int i;
 
-	i = lookForUndefined(*symbols);
-
-	// must end the execution
-	if(!strcmp(label, ""))
-		fprintf(file, "_end\tHM\t_end\n");
-	else {
-		fprintf(file, "%s\tHM\t%s\n", label, label);
-		strcpy(label, "");
+	i = lookUpForCell(*symbols, "main", "procedure");
+	if(i == -1) {
+		printf("ERROR: unexpected behavior defining main procedure.\n");
+		fprintf(file, "ERROR: unexpected behavior defining main procedure.\n");
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
 	}
-	fflush(file);
+	else {
+		if(!getRow(*symbols, i)->defined) {
+			printf("WARNING: main function not defined.\n");
+			fflush(stdout);
+			defineRow(symbols, i);
+		}
+	}
+
+	i = lookForUndefined(*symbols);
 
 	// cannot accept file with undefined labels
 	if(i >= 0) {
@@ -238,7 +261,7 @@ void endFile(FILE* file, DynamicTable* symbols, Token token) {
 	fprintf(file, "_inv\t K\t/FFFF\n");
 
 	// EOF
-	fprintf(file, "\t#\t_end\n");
+	fprintf(file, "\t#\t_start\n");
 	fflush(file);
 }
 /******** LIBRARY ********/
@@ -267,6 +290,37 @@ void setVar(FILE* file, DynamicTable* symbols, Token token) {
 	}
 }
 /******** PROCEDURE ********/
+// 20
+void setProcedure(FILE* file, DynamicTable* symbols, Token token) {
+	printf("semantic: procedure id\n");fflush(stdout);
+	strcpy(procedure, token->value);
+}
+// 19
+void setLink(FILE* file, DynamicTable* symbols, Token token) {
+	int i;
+
+	printf("semantic: procedure\n");fflush(stdout);
+	// TODO: procedures and variables still cannot have the same name
+	i = lookUpForCell(*symbols, procedure, "procedure");
+	if(i == -1) {
+		i = addToTable(symbols, procedure, "procedure");
+		defineRow(symbols, i);
+		fprintf(file, "%s\t K\t/0000\n", procedure);
+		fflush(file);
+		strcpy(procedure, "");
+	}
+	else if(!strcmp(procedure, "main") && !getRow(*symbols, i)->defined) {
+		defineRow(symbols, i);
+	}
+	else {
+		printf("ERROR: redeclaration of \"%s\".\n", procedure);
+		fprintf(file, "ERROR: redeclaration of \"%s\".\n", procedure);
+		fflush(stdout);
+		fflush(file);
+		system("PAUSE");
+		exit(5);
+	}
+}
 
 /******** LABEL ********/
 // 2
