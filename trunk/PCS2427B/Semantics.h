@@ -14,7 +14,7 @@ typedef void (*semantic)(FILE*, DynamicTable*, Token);
 
 int getSemanticFunctionIndex(const char* label);
 semantic semanticFunction(int index);
-void cleanSemanticParameters();
+void startSemantics(FILE* file, DynamicTable* symbols);
 
 /******** GENERAL ********/
 void nil(FILE* file, DynamicTable* symbols, Token token);
@@ -22,6 +22,7 @@ void setIdentifier(FILE* file, DynamicTable* symbols, Token token);
 void setConstant(FILE* file, DynamicTable* symbols, Token token);
 void setType(FILE* file, DynamicTable* symbols, Token token);
 void endBlock(FILE* file, DynamicTable* symbols, Token token);
+void startFile(FILE* file, DynamicTable* symbols, Token token);
 void endFile(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LIBRARY ********/
@@ -30,6 +31,8 @@ void endFile(FILE* file, DynamicTable* symbols, Token token);
 void setVar(FILE* file, DynamicTable* symbols, Token token);
 
 /******** PROCEDURE ********/
+void setProcedure(FILE* file, DynamicTable* symbols, Token token);
+void setLink(FILE* file, DynamicTable* symbols, Token token);
 
 /******** LABEL ********/
 void setLabel(FILE* file, DynamicTable* symbols, Token token);

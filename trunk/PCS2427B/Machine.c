@@ -272,7 +272,7 @@ int consumeFile(Automaton lexer, Machine parser, Table keywords, const char* inp
 	recycled = 0;
 	strcpy(recycledToken->type, "NULL");
 
-	cleanSemanticParameters();
+	startSemantics(compiled, &symbols);
 	semanticAction = semanticFunction(0);
 
 	/* get the initial automaton */
