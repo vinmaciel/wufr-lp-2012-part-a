@@ -1,9 +1,15 @@
-29
-'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'if1' 'if2' 'if3' 'if4' 'if5' 'if6' 'if7' 'if8' 'if9' 'if10' '*endif' 'while0' 'while1' 'while2' 'while3' 'while4' 'while5' 'while6' 'while7' 'id0' 'id1' 'id2' 'id3' 'id4'
-22
-'DO' 'GOTO' 'IF' 'ELSE' 'WHILE' 'IDENTIFIER' 'CONSTANT' ';' ':' '=' '+' '-' '*' '/' '>' '<' '==' '(' ')' '{' '}' '<sentence>'
+31
+'*inicial' 'do0' 'goto0' 'goto1' 'if0' 'if1' 'if2' 'if3' 'if4' 'if5' 'if6' 'if7' 'if8' 'if9' 'if10' '*endif' 'while0' 'while1' 'while2' 'while3' 'while4' 'while5' 'while6' 'while7' 'id0' 'id1' 'id2' 'id3' 'id4' 'return0' 'return1'
+23
+'DO' 'GOTO' 'IF' 'ELSE' 'WHILE' 'RETURN' 'IDENTIFIER' 'CONSTANT' ';' ':' '=' '+' '-' '*' '/' '>' '<' '==' '(' ')' '{' '}' '<sentence>'
 
-'*inicial'		'DO'			'do0' 			'nil'
+'*inicial'		'DO'			'do0'			'nil'
+
+'*inicial'		'RETURN'		'return0'		'nil'
+'return0'		'IDENTIFIER'	'return1'		'setIdentifier'
+'return0'		'CONSTANT'		'return1'		'setConstant'
+'return1'		';'				'*inicial'		'setReturn2'
+'return0'		';'				'*inicial'		'setReturn'
 
 '*inicial'		'GOTO'			'goto0'			'nil'
 'goto0'			'IDENTIFIER'	'goto1'			'setIdentifier'
@@ -29,6 +35,7 @@
 '*endif'		'IF'			'if0'			'noElse'
 '*endif'		'WHILE'			'while0'		'noElse'
 '*endif'		'IDENTIFIER'	'id0'			'noElse'
+'*endif'		'RETURN'		'return0'		'noElse'
 '*endif'		'ELSE'			'if8'			'nil'
 
 'if8'			'{'				'if9'			'nil'
